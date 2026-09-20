@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QuizBlox — Classroom Arcade</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:#10152b;color:#f7f8ff;min-height:100vh}
+button,input,textarea,select{font:inherit}button{border:0;cursor:pointer}
+.top{height:70px;background:#171d3a;border-bottom:2px solid #29315a;display:flex;align-items:center;padding:0 26px;gap:18px;position:sticky;top:0;z-index:5}
+.logo{font-weight:900;font-size:25px;color:#7ee7ff}.logo span{color:#ffd65a}.spacer{flex:1}.pill{background:#222b52;padding:9px 14px;border-radius:99px;font-weight:800}.tokens{color:#ffd65a;display:flex;align-items:center;gap:7px}.coinIcon{width:24px;height:24px;object-fit:contain;display:inline-block;vertical-align:middle;filter:drop-shadow(0 2px 2px #0005)}.coinIcon.small{width:20px;height:20px}.coinIcon.tiny{width:18px;height:18px}
+main{max-width:1200px;margin:auto;padding:28px 22px}.view{display:none}.view.active{display:block}
+#startupGate{position:fixed;inset:0;background:#080c1dcc;backdrop-filter:blur(7px);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px}#startupGate.hidden{display:none}.startupBox{background:#181f3d;border:3px solid #5364bd;border-radius:25px;padding:30px;max-width:760px;width:100%;box-shadow:0 20px 60px #000b}.startupActions{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}.startupBtn{padding:24px;border-radius:18px;border:2px solid #46558f;background:#20274a;color:#fff;text-align:left}.startupBtn:hover{background:#2b3768;transform:translateY(-2px)}.saveList{max-height:55vh;overflow-y:auto;display:grid;gap:10px;margin-top:14px}.saveCard{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;background:#20274a;border:2px solid #374477;border-radius:15px;padding:14px}.saveCardMain{min-width:0}.saveCardName{font-size:18px;font-weight:1000}.saveMeta{color:#b9c2e8;font-size:13px;margin-top:4px}.saveCard button{padding:10px 14px}.saveCardActions{display:flex;gap:8px;align-items:center}.saveCardActions .danger{background:#7d2636;color:#fff;border:2px solid #a83b4d;border-radius:12px;font-weight:900;cursor:pointer}.saveCardActions .danger:hover{background:#963044}@media(max-width:650px){.saveCardActions{display:grid;grid-template-columns:1fr}.saveCardActions button{width:100%}}.startupSub{color:#aeb8e3}.newGameForm{margin-top:18px}.newGameForm button{margin-right:8px}@media(max-width:650px){.startupActions{grid-template-columns:1fr}.saveCard{grid-template-columns:1fr}.saveCard button{width:100%}}
+.hero{background:linear-gradient(135deg,#28346e,#402c76);border:2px solid #5364bd;border-radius:25px;padding:34px;margin-bottom:24px;box-shadow:0 14px 40px #05081666}
+.hero h1{font-size:42px;margin:0 0 8px}.hero p{color:#d6dcff;font-size:17px;max-width:720px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:17px}.card{background:#191f3d;border:2px solid #2d3765;border-radius:19px;padding:20px;box-shadow:0 8px 25px #05081655}.card h3{margin:0 0 8px}
+.navgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-top:18px}.navbtn{padding:18px;background:#202955;color:white;border-radius:16px;text-align:left;border:2px solid #354176}.navbtn:hover{transform:translateY(-2px);background:#273263}
+.primary{background:#65d6ff;color:#081426;padding:12px 18px;border-radius:12px;font-weight:900}.gold{background:#ffd65a;color:#231b00}.danger{background:#ff697e;color:#270812}.muted{background:#303a67;color:white}.playChoiceGrid{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:850px;margin:30px auto}.playChoiceBtn{padding:32px;border-radius:22px;background:#202955;color:#fff;border:3px solid #354176;text-align:center}.playChoiceBtn h2{margin:0 0 8px}.playChoiceBtn p{margin:0;color:#aeb8e3}.playChoiceBtn.online{border-color:#65d6ff}.playChoiceBtn.solo{border-color:#9b7cff}@media(max-width:700px){.playChoiceGrid{grid-template-columns:1fr}}#treasureGoldDisplay.crazyLbs{background:linear-gradient(135deg,#075b9b,#123d73);border-color:#65d6ff}#treasureGoldDisplay.crazyLbs .goldLabel{color:#c8efff}#treasureGoldDisplay.crazyLbs .goldAmount{color:#fff}
+input,textarea,select{width:100%;background:#0e1430;color:white;border:2px solid #394578;border-radius:11px;padding:11px;margin:6px 0 12px}textarea{min-height:90px}
+.back{margin-bottom:18px}.title{font-size:31px;margin:5px 0 20px}.small{color:#aeb8e3;font-size:14px}.playerline{display:flex;align-items:center;gap:12px;padding:12px;background:#20274a;border-radius:13px;margin:8px 0}.playerblook{font-size:34px}.hostplayers{min-height:70px}.center{text-align:center}
+.blooks{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:7px;max-height:220px;overflow-y:auto;padding:4px}.blook{position:relative;text-align:center;padding:6px 4px;border-radius:10px;background:#20274a;border:2px solid #374477;min-height:76px;font-size:11px}.blook .avatar{font-size:30px;display:block;margin:1px auto 3px}.blook .rarity{font-size:8px;letter-spacing:.5px}.blook b{font-size:10px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mythic{color:#fff;animation:mythicRainbow .35s linear infinite}@keyframes mythicRainbow{0%{color:#ff2d55}16%{color:#ff9f0a}33%{color:#ffd60a}50%{color:#30d158}66%{color:#0a84ff}83%{color:#bf5af2}100%{color:#ff2d55}}.rarity{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:1px}.common{color:#c9d0e8}.uncommon{color:#65e08d}.rare{color:#63b8ff}.epic{color:#c58cff}.legendary{color:#ffb84e}.chroma{color:#ff6cf0}
+.exotic{color:#bdefff;background:linear-gradient(90deg,#dffbff,#8fe8ff,#ffffff,#9feeff);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:1000}.collectionItem.exotic{background:linear-gradient(135deg,#bff5ff,#ffffff);color:#12405a}.mythic{font-weight:1000;background:linear-gradient(90deg,#ff3b3b,#ff9f1c,#ffe600,#38ff7a,#39d5ff,#6d5cff,#ff4fd8,#ff3b3b);background-size:400% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:mythicRainbow .35s linear infinite}
+@keyframes mythicRainbow{from{background-position:0% 50%}to{background-position:400% 50%}}
+.packColumns{display:flex;flex-direction:column;gap:14px;align-items:stretch}
+.packColumn{position:relative;background:#191f3d;border:2px solid #2d3765;border-radius:18px;padding:10px 12px;min-width:0;overflow:hidden}.packColumn::before{content:"";position:absolute;inset:0;opacity:.24;pointer-events:none;background-size:cover;background-position:center}.packColumn>*{position:relative;z-index:1}.packColumn.sport::before{background:repeating-linear-gradient(90deg,#2f8f45 0 26px,#318f48 26px 52px),radial-gradient(circle at center,transparent 0 28%,#fff 29% 30%,transparent 31%)}.packColumn.animal::before{background:radial-gradient(circle at 18% 25%,#7fd36b 0 8%,transparent 9%),radial-gradient(circle at 78% 20%,#3f9d4d 0 10%,transparent 11%),linear-gradient(135deg,#173f24,#356b35 45%,#142d1d)}.packColumn.fruit::before{background:radial-gradient(circle at 20% 35%,#ffcf66 0 7%,transparent 8%),radial-gradient(circle at 72% 28%,#ef7868 0 8%,transparent 9%),linear-gradient(135deg,#704b32,#b36b3f 45%,#4d3828)}
+.packColumn h2{text-align:left;margin:2px 0 8px;font-size:18px}.packItems{display:flex;flex-wrap:nowrap;gap:6px;overflow-x:auto;overflow-y:hidden;padding:2px 2px 7px}.packItems::-webkit-scrollbar{height:7px}.packItems::-webkit-scrollbar-thumb{background:#394578;border-radius:99px}
+.collectionItem{background:#20274a;border:2px solid #374477;border-radius:14px;padding:10px;text-align:center;min-height:125px;display:flex;flex-direction:column;justify-content:center;align-items:center;cursor:pointer;transition:transform .12s,filter .12s}.collectionItem:hover{transform:translateY(-2px);filter:brightness(1.12)}
+.setupBloxCard{padding:10px}.setupBloxCard h3{margin:0 0 7px}.collectionItem{flex:0 0 68px;min-width:68px;padding:5px;border-radius:9px}.collectionItem .rarity{font-size:8px}.collectionItem.common{background:#c9d0e8;color:#17203a}.collectionItem.uncommon{background:#65e08d;color:#102519}.collectionItem.rare{background:#63b8ff;color:#07192b}.collectionItem.epic{background:#c58cff;color:#24103d}.collectionItem.legendary{background:#ffb84e;color:#321d00}.collectionItem.mythic{background:#fff;color:#111}.collectionItem.chroma{background:#ff6cf0;color:#260021}.collectionItem .avatar{font-size:22px;margin:0 auto 3px}.collectionItem .blookName{display:none;font-weight:900;font-size:7px;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.collectionItem .rarity{color:inherit!important}.collectionItem.locked{cursor:default;background:#20274a!important;color:#fff!important}.collectionItem.locked .avatar{filter:brightness(0);opacity:1;font-size:28px}.collectionItem.locked .blookName,.collectionItem.locked .rarity{display:none}
+.revealLegendary .modalbox{background:#000;border-color:#333;animation:legendaryBg 2s ease both}.revealLegendary .drop,.revealMythic .drop{animation:revealZoom 1.7s cubic-bezier(.2,.85,.2,1) both;transform-origin:center}
+.multiOpen .modalbox{max-width:900px}.packOpening{min-height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}.packOpeningTitle{font-size:28px;font-weight:1000}.packSpinner{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:18px 0}.packSpinCard{width:82px;height:105px;background:#20274a;border:3px solid #5364bd;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:42px;animation:packSpin .7s cubic-bezier(.2,.8,.2,1) infinite alternate;box-shadow:0 8px 20px #0005}.packSpinCard:nth-child(2){animation-delay:.1s}.packSpinCard:nth-child(3){animation-delay:.2s}.packSpinCard:nth-child(4){animation-delay:.3s}.packSpinCard:nth-child(5){animation-delay:.4s}@keyframes packSpin{0%{transform:translateY(12px) rotate(-7deg) scale(.88);filter:brightness(.7)}100%{transform:translateY(-12px) rotate(7deg) scale(1.08);filter:brightness(1.35)}}.multiResults{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:10px;max-height:58vh;overflow:auto;margin:16px 0}.multiResultCard{background:#20274a;border:2px solid #374477;border-radius:15px;padding:12px;text-align:center}.multiResultIcon{font-size:48px;line-height:1.05}.multiResultName{font-weight:1000;margin-top:5px}.multiResultRarity{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.8px;margin-top:3px}.multiResultChance{font-size:11px;color:#aeb8e3;margin-top:4px}@media(max-width:650px){.multiResults{grid-template-columns:repeat(2,1fr)}.packSpinCard{width:66px;height:88px}}
+.revealMythic .modalbox{border-color:transparent;animation:mythicBg 2.8s ease both}.revealMythic .drop{animation-delay:1.0s;animation-duration:1.8s}
+@keyframes legendaryBg{0%,45%{background:#000}100%{background:#181f3d}}
+@keyframes mythicBg{0%,35%{background:#000}55%{background:linear-gradient(135deg,#ff1744,#ffea00,#00e676,#00b0ff,#7c4dff,#ff4081)}100%{background:linear-gradient(135deg,#ff1744,#ffea00,#00e676,#00b0ff,#7c4dff,#ff4081);background-size:300% 300%}}
+@keyframes revealZoom{0%{transform:scale(.05);opacity:0}45%{transform:scale(.42);opacity:1}100%{transform:scale(1);opacity:1}}
+#bloxDetail{position:fixed;right:22px;top:105px;width:330px;min-height:380px;background:#181f3d;border:3px solid #5364bd;border-radius:22px;padding:24px;z-index:60;box-shadow:0 14px 40px #05081699;display:none;text-align:center}#bloxDetail.open{display:block}.bloxDetailClose{position:absolute;right:10px;top:8px;background:#303a67;color:#fff;border-radius:9px;padding:5px 9px;font-weight:900}.bloxDetailImg{font-size:120px;line-height:1.1;margin:28px auto 12px}.bloxDetailName{font-size:27px;font-weight:1000;margin:8px 0}.bloxDetailRarity{font-size:18px;font-weight:1000;text-transform:uppercase;letter-spacing:1px}.collectionItem .equipBtn{font-size:10px;padding:5px 7px}@media(max-width:900px){#bloxDetail{width:290px;right:10px}}@media(max-width:650px){#bloxDetail{position:fixed;left:10px;right:10px;top:auto;bottom:10px;width:auto;min-height:260px;padding:16px}.bloxDetailImg{font-size:85px;margin:18px auto 5px}}
+@media(max-width:850px){.packColumns{display:flex}.packItems{display:flex;flex-wrap:nowrap}}
+.nametag{display:inline-block;padding:4px 10px;border-radius:10px;font-weight:1000;line-height:1.1;box-shadow:inset 0 0 0 2px #ffffff33}.nametag-normal{background:#20274a}.nametag-dot{background-color:#ff5bbd;background-image:radial-gradient(#8b5cf6 2px,transparent 3px),radial-gradient(#fff3 2px,transparent 3px);background-size:14px 14px,19px 19px;background-position:0 0,7px 8px}.nametag-yinyang{background:linear-gradient(90deg,#fff 0 50%,#111 50% 100%);color:#777;text-shadow:0 1px 2px #fff}.nametag-fantasy{background:linear-gradient(120deg,#ff4d6d,#ffb703,#70e000,#00b4d8,#7b2cbf,#ff4d6d);background-size:300% 300%;animation:fantasyTag 5s linear infinite;color:#fff;text-shadow:0 2px 3px #000}.nametag-fantasy::before{content:"🌈 🦄 ";}.nametag-fantasy::after{content:" 🦄 🌈"}@keyframes fantasyTag{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}.tagShopCard{position:relative;overflow:hidden}.ownedTag{color:#65d6ff;font-weight:900}.tagPreview{font-size:18px;margin:10px 0}.treasureChestButton.autoChest{cursor:default;animation:chestAutoOpen 1s ease both}.treasureChestButton.autoChest:hover{transform:none;box-shadow:0 18px 45px #0008}@keyframes chestAutoOpen{0%{transform:scale(.82) rotate(-2deg);opacity:.2}45%{transform:scale(1.04) rotate(1deg);opacity:1}75%{transform:scale(1)}100%{transform:scale(1)}}#chestGrid{position:relative;z-index:2}.singleChestArea{display:flex;align-items:center;justify-content:center;min-height:360px}.treasureChestButton{width:280px;min-height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:linear-gradient(150deg,#202957,#34235c);border-radius:28px;border:4px solid #ffd65a;box-shadow:0 18px 45px #0008;transition:transform .12s,box-shadow .12s;cursor:pointer;user-select:none}.treasureChestButton:hover{transform:translateY(-5px) scale(1.02);box-shadow:0 24px 55px #000a}.treasureChestButton:active{transform:scale(.97)}.treasureChestIcon{font-size:125px;line-height:1}.treasureChestButton h2{margin:0}.treasureChestButton p{margin:0;color:#cfd6ff}.treasureChestButton.revealed{cursor:default;border-color:#65d6ff}.treasureChestButton.revealed:hover{transform:none;box-shadow:0 18px 45px #0008}.box{min-height:210px;position:relative;z-index:3;pointer-events:auto;text-align:center;background:linear-gradient(150deg,#202957,#34235c);border-radius:20px;border:2px solid #4c5b9b;padding:22px}.boxicon{font-size:65px}
+.mode{display:flex;gap:15px;align-items:center}.mode .emoji{font-size:42px}.mode p{margin:4px 0;color:#aeb8e3}
+
+/* Crazy Casting */
+.crazyRod,.crazyLine,.crazyBobber{display:none!important}.crazyCastingScene{position:relative;min-height:540px;overflow:hidden;border-radius:24px;border:3px solid #385f83;background:linear-gradient(#72d6ff 0 38%,#4db6d9 38% 40%,#1680ad 40% 100%);box-shadow:0 18px 50px #0008;cursor:pointer}
+.crazySky{position:absolute;inset:0 0 60% 0;background:linear-gradient(#79dfff,#c9f5ff);pointer-events:none}
+.crazyCloud{position:absolute;font-size:46px;opacity:.8;pointer-events:none}.crazyCloud.one{left:9%;top:9%}.crazyCloud.two{right:13%;top:18%}.crazyCloud.three{left:43%;top:4%}
+.crazyWater{position:absolute;left:0;right:0;top:39%;bottom:0;background:repeating-linear-gradient(0deg,#116e9a 0 20px,#1682b2 20px 40px);opacity:.96;pointer-events:none}
+.crazyBridge{position:absolute;left:8%;right:8%;top:45%;height:92px;background:repeating-linear-gradient(90deg,#8b542e 0 44px,#a96837 44px 48px);border:5px solid #57331f;border-radius:12px;box-shadow:0 12px 0 #432819;pointer-events:none}
+.crazyRail{position:absolute;left:4%;right:4%;top:-38px;height:45px;border:6px solid #57331f;border-bottom:0;border-radius:20px 20px 0 0}.crazyPost{position:absolute;top:-8px;width:10px;height:55px;background:#57331f}.crazyPost.a{left:12%}.crazyPost.b{left:50%}.crazyPost.c{right:12%}
+.crazyPlayer{position:absolute;left:50%;top:33%;transform:translate(-50%,-50%);font-size:88px;z-index:4;filter:drop-shadow(0 8px 5px #0008);pointer-events:none}.crazyRod{position:absolute;left:54%;top:29%;font-size:75px;transform:rotate(-22deg);z-index:3;pointer-events:none}.crazyLine{position:absolute;left:64%;top:34%;height:125px;border-left:3px solid #eee;transform:rotate(4deg);transform-origin:top;z-index:2;pointer-events:none}.crazyBobber{position:absolute;left:65%;top:57%;font-size:28px;z-index:3;pointer-events:none}
+.crazyHud{position:absolute;top:16px;left:16px;right:16px;display:flex;justify-content:space-between;gap:12px;z-index:10;pointer-events:none}.crazyHud .pill{background:#0d294dcc}.crazyPrompt{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);background:#071b2ccc;border:2px solid #a9edff;border-radius:14px;padding:12px 22px;font-size:20px;font-weight:1000;z-index:10;pointer-events:none;white-space:nowrap}.crazyCatch{position:absolute;left:50%;top:19%;transform:translateX(-50%);font-size:30px;font-weight:1000;background:#071b2ce8;padding:10px 20px;border-radius:14px;z-index:10;pointer-events:none}.crazyCatch.lure{animation:lurePop .8s ease both}@keyframes lurePop{0%{transform:translateX(-50%) scale(.2);opacity:0}60%{transform:translateX(-50%) scale(1.15);opacity:1}100%{transform:translateX(-50%) scale(1)}}
+.crazyReward{position:absolute;left:50%;top:57%;transform:translate(-50%,-50%);background:#10152bee;border:3px solid #ffd65a;border-radius:20px;padding:18px 30px;text-align:center;z-index:12;pointer-events:none;min-width:260px}.crazyRewardIcon{font-size:64px}.crazyRewardName{font-size:27px;font-weight:1000}.crazyRewardLbs{font-size:21px;color:#ffd65a;font-weight:1000}.crazyRewardAnimated{animation:catchRewardPop 1.35s ease both}.crazyRewardAnimated .crazyRewardIcon{animation:catchFishBounce 1.35s ease both}@keyframes catchRewardPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.35) translateY(35px)}25%{opacity:1;transform:translate(-50%,-50%) scale(1.12) translateY(-8px)}55%{transform:translate(-50%,-50%) scale(.96) translateY(0)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}@keyframes catchFishBounce{0%{transform:translateY(30px) rotate(-12deg);opacity:0}35%{transform:translateY(-14px) rotate(8deg);opacity:1}65%{transform:translateY(3px) rotate(-3deg)}100%{transform:translateY(0) rotate(0)}}
+.crazyQuestionWrap{position:relative;z-index:20;background:#11182feF;margin:24px auto 0;max-width:900px;border-radius:20px;padding:20px;border:3px solid #5364bd}.crazyQuestionWrap .answers{margin-top:14px}
+.question{background:#191f3d;border:2px solid #34406f;border-radius:20px;padding:26px;max-width:850px;margin:auto}.answers{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:20px}.answer{padding:17px;border-radius:13px;background:#252e59;color:#fff;border:2px solid #3b497c;text-align:left;font-weight:800}.answer:hover{background:#303b70}.answer.correct{background:#267c59;border-color:#52dc9c}.answer.wrong{background:#87354a;border-color:#ff7187}
+.bar{height:13px;background:#0c1128;border-radius:20px;overflow:hidden}.bar>i{display:block;height:100%;background:#65d6ff;width:0}
+.leader{display:flex;align-items:center;gap:13px;padding:13px;border-radius:13px;background:#20274a;margin:8px 0}.rank{font-size:21px;font-weight:900;width:35px}.miniavatar{font-size:32px}.score{margin-left:auto;font-weight:900;color:#ffd65a}
+.exoticReveal .modalbox{background:#000;border-color:#c9f8ff;animation:exoticFlash .9s ease both}.exoticFly{font-size:76px;animation:exoticFly 1.7s cubic-bezier(.2,.8,.2,1) both}.exoticBig{font-size:150px;animation:exoticZoom .9s cubic-bezier(.15,.8,.2,1) both}@keyframes exoticFly{0%{transform:translateX(-45vw) scale(.25) rotate(-20deg)}20%{transform:translateX(38vw) scale(.35) rotate(18deg)}40%{transform:translateX(-34vw) scale(.4) rotate(-18deg)}60%{transform:translateX(30vw) scale(.45) rotate(15deg)}80%{transform:translateX(-18vw) scale(.55) rotate(-10deg)}100%{transform:translateX(0) scale(.7) rotate(0)}}@keyframes exoticZoom{0%{transform:scale(.1);opacity:.2}70%{transform:scale(1.35);opacity:1}100%{transform:scale(1);opacity:1}}@keyframes exoticFlash{0%{filter:brightness(.2)}35%{filter:brightness(1.8)}100%{filter:brightness(1)}}.modal{position:fixed;inset:0;background:#050816cc;display:none;align-items:center;justify-content:center;z-index:20;padding:20px}.modal.open{display:flex}.modalbox{background:#181f3d;border:2px solid #46558f;border-radius:22px;padding:28px;max-width:500px;width:100%;text-align:center}.drop{font-size:100px}
+.toast{position:fixed;right:20px;bottom:20px;background:#242e59;border:2px solid #52629b;padding:14px 18px;border-radius:13px;display:none;z-index:30}
+#treasureGoldDisplay{position:fixed;right:18px;top:105px;z-index:40;background:linear-gradient(135deg,#3a2a00,#171d3a);border:4px solid #ffd65a;border-radius:22px;padding:18px 24px;min-width:210px;text-align:center;box-shadow:0 12px 35px #0008;display:none}
+#treasureGoldDisplay .goldLabel{font-size:16px;font-weight:900;color:#ffe58a;letter-spacing:1px}
+#treasureGoldDisplay .goldAmount{font-size:48px;font-weight:1000;color:#ffd65a;line-height:1.05;margin-top:4px}
+.stealOverlay{position:fixed;inset:0;z-index:85;display:none;pointer-events:none;background:#0003}.stealOverlay.open{display:block}.stealMessage{position:absolute;left:50%;top:16%;transform:translateX(-50%);background:#171d3aee;border:3px solid #ffd65a;border-radius:18px;padding:12px 20px;font-weight:1000;font-size:22px;box-shadow:0 10px 30px #0008}.stealCash{position:absolute;font-size:62px;cursor:pointer;pointer-events:auto;filter:drop-shadow(0 6px 8px #0008);animation:cashWiggle .18s infinite alternate;user-select:none}.stealTimerText{position:absolute;left:50%;bottom:12%;transform:translateX(-50%);font-weight:1000;font-size:28px;text-shadow:0 3px 8px #000}.treasureChestButton.autoChest{cursor:default;animation:none}.treasureChestButton.autoChest:hover{transform:none;box-shadow:0 18px 45px #0008}.treasureChestIcon.chestPulse{animation:chestPulse .55s cubic-bezier(.15,.8,.25,1) both}@keyframes chestPulse{0%{transform:scale(.75)}45%{transform:scale(1.9)}72%{transform:scale(1.18)}100%{transform:scale(1.35)}}@keyframes cashWiggle{from{transform:rotate(-10deg) scale(1)}to{transform:rotate(10deg) scale(1.08)}}
+
+.swapOverlay{position:fixed;inset:0;z-index:96;display:none;align-items:center;justify-content:center;background:#050816ee;padding:20px}
+.swapOverlay.open{display:flex}
+.swapCard{width:min(900px,96vw);background:#171d3a;border:3px solid #ffd65a;border-radius:28px;padding:30px 26px;text-align:center;box-shadow:0 20px 70px #000b;overflow:hidden}
+.swapTitle{font-size:34px;font-weight:1000;color:#ffd65a;margin-bottom:24px}
+.swapStage{display:flex;align-items:center;justify-content:center;gap:28px;perspective:900px}
+.swapPlayer{width:min(300px,34vw);min-height:230px;border:3px solid #52629b;background:#20274a;border-radius:22px;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.swapPlayerLabel{font-size:15px;color:#b9c2e8;font-weight:900;text-transform:uppercase;letter-spacing:1px}
+.swapBlox{font-size:92px;line-height:1;margin:10px 0;filter:drop-shadow(0 8px 10px #0008)}
+.swapName{font-size:24px;font-weight:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.swapArrow{font-size:55px;font-weight:1000;color:#ffd65a;animation:swapSpin 1s linear infinite}
+.swapPlayer.spinLeft{animation:swapCardSpinLeft 1.15s cubic-bezier(.2,.8,.2,1) both}
+.swapPlayer.spinRight{animation:swapCardSpinRight 1.15s cubic-bezier(.2,.8,.2,1) both}
+.swapBlox.spinBlox{animation:bloxSpin 1.15s cubic-bezier(.2,.8,.2,1) both}
+.swapDone{font-size:22px;font-weight:1000;color:#7dffb1;margin-top:22px;opacity:0;animation:swapDone .35s ease 1.05s forwards}
+@keyframes swapSpin{0%,100%{transform:rotate(0)}50%{transform:rotate(180deg)}}
+@keyframes swapCardSpinLeft{0%{transform:rotateY(0) translateX(0) scale(1)}35%{transform:rotateY(180deg) translateX(45px) scale(.88)}70%{transform:rotateY(360deg) translateX(-45px) scale(.94)}100%{transform:rotateY(720deg) translateX(0) scale(1)}}
+@keyframes swapCardSpinRight{0%{transform:rotateY(0) translateX(0) scale(1)}35%{transform:rotateY(-180deg) translateX(-45px) scale(.88)}70%{transform:rotateY(-360deg) translateX(45px) scale(.94)}100%{transform:rotateY(-720deg) translateX(0) scale(1)}}
+@keyframes bloxSpin{0%,100%{transform:scale(1) rotate(0)}35%{transform:scale(1.35) rotate(180deg)}70%{transform:scale(.8) rotate(360deg)}}
+@keyframes swapDone{to{opacity:1;transform:translateY(0)}}
+.cryptoRewardOverlay{position:fixed;inset:0;z-index:97;display:none;align-items:center;justify-content:center;background:#050816d9;padding:20px}
+.cryptoRewardOverlay.open{display:flex}
+.cryptoRewardCard{min-width:min(650px,92vw);background:#11182f;border:4px solid #65d6ff;border-radius:30px;padding:35px 45px;text-align:center;box-shadow:0 25px 90px #000c;animation:cryptoReveal .7s cubic-bezier(.15,.8,.2,1) both}
+.cryptoRewardLabel{font-size:20px;font-weight:1000;color:#bfeeff;text-transform:uppercase;letter-spacing:2px}
+.cryptoRewardBig{font-size:92px;font-weight:1000;color:#65d6ff;line-height:1.05;margin:12px 0;text-shadow:0 0 28px #65d6ff88}
+.cryptoRewardSub{font-size:25px;font-weight:1000}
+@keyframes cryptoReveal{0%{transform:scale(.15) rotate(-8deg);opacity:0}60%{transform:scale(1.15) rotate(3deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
+
+#adminPanel{position:fixed;right:18px;bottom:18px;z-index:100;background:#171d3a;border:3px solid #ff5f7a;border-radius:14px;padding:10px;width:300px;box-shadow:0 12px 35px #0009;display:none}
+#adminPanel input{margin:0;border-color:#ff5f7a}
+.xrayBox{opacity:.52!important}
+@media(max-width:700px){#treasureGoldDisplay{right:8px;top:82px;min-width:145px;padding:10px 14px}.goldAmount{font-size:36px!important}}
+.stat{font-size:30px;font-weight:900}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}.tabs button{padding:9px 13px;border-radius:10px;background:#242d56;color:white}
+#gameLeaderboard{position:fixed;left:18px;top:105px;width:245px;z-index:35;background:#171d3a;border:3px solid #52629b;border-radius:18px;padding:12px;box-shadow:0 12px 35px #0009;display:none}.gameLeadTitle{font-size:17px;font-weight:1000;margin-bottom:8px}.gameLeadRow{display:flex;align-items:center;gap:8px;padding:8px;border-radius:10px;background:#20274a;margin:5px 0}.gameLeadRow.me{border:2px solid #65d6ff}.gameLeadRank{width:25px;font-weight:1000}.gameLeadIcon{font-size:27px}.gameLeadName{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gameLeadScore{margin-left:auto;font-weight:1000;color:#ffd65a}.wrongCountdown{position:fixed;inset:0;background:#050816ee;z-index:95;display:none;align-items:center;justify-content:center}.wrongCountdown.open{display:flex}.wrongCountdownNum{font-size:130px;font-weight:1000;animation:countPop .8s ease both}.countdown{position:fixed;inset:0;background:#050816dd;z-index:90;display:none;align-items:center;justify-content:center}.countdown.open{display:flex}.countdownNum{font-size:150px;font-weight:1000;animation:countPop .8s ease both}.countdownGo{font-size:105px;color:#65d6ff}@keyframes countPop{0%{transform:scale(.3);opacity:0}30%{opacity:1}100%{transform:scale(1.1);opacity:0}}#finishPodium{margin-top:18px}.podiumRow{display:flex;align-items:center;gap:12px;background:#20274a;border-radius:13px;padding:12px;margin:8px 0}.placeBonus{margin-left:auto;color:#ffd65a;font-weight:1000}@media(max-width:900px){#gameLeaderboard{left:8px;width:190px;top:82px}.question{margin-left:205px}.grid{gap:10px}}@media(max-width:700px){#gameLeaderboard{position:relative;left:auto;top:auto;width:100%;margin:0 0 12px}.question{margin-left:auto}}
+@media(max-width:650px){.answers{grid-template-columns:1fr}.hero h1{font-size:31px}.top{padding:0 12px}.top .navhide{display:none}}
+
+.selectedSetCard{background:#20274a;border:2px solid #5364bd;border-radius:14px;padding:14px;font-size:19px;font-weight:1000;margin:10px 0}.discoverBtn{width:100%;padding:13px;border-radius:12px;border:2px solid #5364bd;background:#242d55;color:#fff;font-weight:900;cursor:pointer}.discoverCard{cursor:pointer;transition:.15s}.discoverCard:hover{transform:translateY(-3px);border-color:#65d6ff}.popularSet{color:#ffd34e;text-shadow:0 0 10px #ffd34e}.discoverQuestion{padding:13px;background:#20274a;border-radius:12px;margin:8px 0}.discoverFlag{font-size:100px;line-height:1.1;text-align:center;margin:8px 0}.flagQuestionVisual{font-size:115px;text-align:center;line-height:1.05;margin:8px 0 16px;filter:drop-shadow(0 8px 12px #0007)}
+
+.discoverFlagImage{display:block;width:min(420px,90%);max-height:230px;object-fit:contain;margin:12px auto 18px;border-radius:10px;box-shadow:0 4px 14px #0002}
+.discoverAnswers{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.discoverAnswer{border:2px solid #d8dce8;background:#f7f8fc;border-radius:10px;padding:10px;font-weight:700;cursor:default;color:#222}
+.flagQuestionVisual{display:block;width:min(560px,85%);max-height:260px;object-fit:contain;margin:16px auto;border-radius:12px;box-shadow:0 5px 18px #0002}
+
+.hackerGate{text-align:center;max-width:620px;margin:40px auto}.hackerIcon{font-size:76px}.hackerGate input{max-width:430px;margin:15px auto;font-size:20px;text-align:center}.hackerStartBtn{display:block;margin:8px auto}.hackerBoxes{text-align:center;max-width:760px;margin:30px auto}.hackerBoxTimer{font-size:64px;font-weight:1000;color:#65d6ff;margin:6px 0 2px;text-shadow:0 4px 14px #0008}.hackerBoxHint{color:#b9c2e8;font-weight:800}.hackerBoxGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:22px}.hackerBoxGrid button{min-height:150px;border-radius:22px;border:3px solid #65d6ff;background:#18244b;color:#fff;font-size:70px;font-weight:1000;cursor:default;box-shadow:0 12px 0 #0c1330;transition:.08s transform,.08s background,.08s border-color}.hackerBoxGrid button.hoverSelected{background:#25a55f;border-color:#7dffb1;box-shadow:0 12px 0 #12683b;transform:translateY(-3px)}.hackerBoxGrid button span{display:block;font-size:20px;margin-top:8px}.hackerOptions{display:grid;grid-template-columns:1fr;gap:10px;margin-top:18px}.hackerOptions button{padding:15px;border-radius:12px;background:#252e59;color:#fff;border:2px solid #3b497c;font-weight:900;cursor:pointer}.hackerOptions button:hover{border-color:#65d6ff;background:#303b70}.hackerOptions button.hoverSelected{background:#25a55f;border-color:#7dffb1;box-shadow:0 0 0 3px #12683b66;transform:translateY(-2px)}.hackerHackCard{background:#11182f;border:2px solid #ff6b91;border-radius:18px;padding:20px}.hackerHackCard h2{color:#ff8ead}.hackerResult{font-size:22px;font-weight:1000;margin:14px 0}.hackerCrypto{color:#65d6ff;font-weight:1000}
+#treasureGoldDisplay.hackerCryptoMode{background:linear-gradient(135deg,#101a42,#17204e);border-color:#65d6ff}#treasureGoldDisplay.hackerCryptoMode .goldLabel{color:#bfeeff}#treasureGoldDisplay.hackerCryptoMode .goldAmount{color:#65d6ff}
+@media(max-width:650px){.hackerBoxGrid{grid-template-columns:1fr}.hackerBoxGrid button{min-height:110px}}
+
+
+.treasureRewardBags{
+  min-height:72px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:4px;
+  font-size:clamp(42px,6vw,68px);
+  line-height:1;
+  animation:rewardBagsPop .45s ease both;
+}
+@keyframes rewardBagsPop{
+  0%{transform:scale(.45);opacity:0}
+  70%{transform:scale(1.08);opacity:1}
+  100%{transform:scale(1);opacity:1}
+}
+.hackerPasswordResult{
+  text-align:center;
+  padding:28px 20px;
+  border-radius:22px;
+  background:#171d3a;
+  border:3px solid #29315a;
+  box-shadow:0 18px 50px rgba(0,0,0,.35);
+  animation:passwordResultPop .35s ease both;
+}
+.hackerResultLock{
+  font-size:92px;
+  line-height:1;
+  margin-bottom:10px;
+}
+.hackerPasswordWrong{border-color:#e53935}
+.hackerPasswordCorrect{border-color:#32c96b}
+.hackerPasswordWrong .hackerResultLock{
+  filter:sepia(1) saturate(8) hue-rotate(320deg) brightness(.9);
+}
+.hackerPasswordCorrect .hackerResultLock{
+  filter:sepia(1) saturate(7) hue-rotate(70deg) brightness(1.05);
+}
+.hackerPasswordWrong h2{color:#ff5252}
+.hackerPasswordCorrect h2{color:#45e879}
+.hackerPasswordResult p{font-size:20px;margin:8px 0 0}
+.hackerStolen{font-size:22px;font-weight:800;margin-top:14px;color:#ffd54a}
+@keyframes passwordResultPop{
+  0%{transform:scale(.8);opacity:0}
+  100%{transform:scale(1);opacity:1}
+}
+</style>
+</head>
+<body>
+<div id="startupGate"><div class="startupBox" id="startupContent"><div class="center"><h1 class="title">🎮 Welcome to QuizBlox</h1><p class="startupSub">Before you enter the lobby, choose whether you want to start a new game or load an existing save slot.</p></div><div class="startupActions"><button class="startupBtn" onclick="showNewGameForm()"><h2>🆕 New Game</h2><p class="startupSub">Create a fresh save slot and choose your username.</p></button><button class="startupBtn" onclick="showSaveSlots()"><h2>💾 Load Save</h2><p class="startupSub">Choose from your saved slots, including username, Bloxcoins and last played time.</p></button></div></div></div>
+<header class="top">
+  <div class="logo">Quiz<span>Blox</span></div>
+  <div class="spacer"></div><div class="pill tokens"><img class="coinIcon" src="quizblox-coin.png" alt="Bloxcoin"> <b id="tokenTop">0</b></div>
+  <div class="pill" id="usernameTop">Guest</div>
+  <button class="pill muted" id="topCollection" onclick="show('collection')">🧸 <span class="navhide">Collection</span></button><button class="pill danger" id="topExit" onclick="exitGame()" style="display:none">🚪 Exit</button>
+</header>
+
+<main>
+<section id="home" class="view active">
+ <div class="hero"><h1>Turn questions into an arcade.</h1><p>Play solo, answer endless questions, earn tokens, and keep going until your timer runs out.</p>
+ <button class="primary" onclick="show('playChoice')">🎮 Play</button></div>
+ <h2>Game modes</h2>
+ <div class="grid">
+  <div class="card mode"><div class="emoji">💰</div><div><h3>Gold Wars</h3><p>Get a question right, watch the treasure chest open, and find gold, multipliers, or a steal.</p></div></div>
+  <div class="card mode"><div class="emoji">🎣</div><div><h3>Crazy Casting</h3><p>Stand on a bridge above the water, click to cast, answer a question, and catch loot worth lbs. Start with Trash and Common catches, then earn lure upgrades to unlock rarer catches.</p></div></div>
+  <div class="card mode"><div class="emoji">💻</div><div><h3>Heated Hackers</h3><p>Set a secret password, answer questions, pick a mystery box, and try to hack other players for their Crypto.</p></div></div>
+  <div class="card mode"><div class="emoji">📖</div><div><h3>Study</h3><p>Answer questions at your own pace, track how many you get right, and earn +1 token for every correct answer.</p></div></div>
+ </div>
+ <div class="navgrid">
+  <button class="navbtn" onclick="show('market')">🎁 Market<br><span class="small">Open Blox Boxes</span></button>
+  <button class="navbtn" onclick="show('sets')">📚 View My Sets<br><span class="small">Play your saved sets</span></button><button class="navbtn" onclick="show('createSet')">✏️ Create a Set<br><span class="small">Make your own question set</span></button><button class="navbtn" onclick="show('discover')">🌎 Discover<br><span class="small">Browse all built-in sets</span></button>
+  <button class="navbtn" onclick="show('collection')">🧸 My Blox<br><span class="small">View your collection</span></button>
+  <button class="navbtn" onclick="show('results')">📊 Reports<br><span class="small">Recent performance</span></button>
+ </div>
+</section>
+
+<section id="playChoice" class="view">
+<button class="back muted" onclick="show('home')">← Back</button>
+<h1 class="title center">🎮 Choose How to Play</h1>
+<div class="playChoiceGrid">
+ <button class="playChoiceBtn online" onclick="choosePlayType('online')"><h2>🌐 Play Online</h2><p>Play with the same setup as before, including AI opponents and leaderboard placements.</p></button>
+ <button class="playChoiceBtn solo" onclick="choosePlayType('solo')"><h2>🧍 Play Solo</h2><p>Play by yourself with no opponents, no bots, and no 1st/2nd/3rd place rewards.</p></button>
+</div>
+</section>
+
+<section id="setup" class="view">
+<button class="back muted" onclick="show('home')">← Back</button>
+<h1 class="title">Choose Your Player</h1>
+<div class="grid">
+ <div class="card">
+  <h3>👤 Username</h3>
+  <input id="setupName" maxlength="18" placeholder="Enter your username">
+  <p class="small">This name appears during your solo game.</p>
+ </div>
+ <div class="card setupBloxCard">
+  <h3>🧸 Choose a Blox</h3>
+  <div id="setupBlooks" class="blooks"></div>
+ </div>
+</div>
+<div class="center" style="margin-top:18px"><button class="primary" onclick="confirmSetup()">✅ Ready</button></div>
+</section>
+
+<section id="host" class="view">
+<button class="back muted" onclick="show('playChoice')">← Back</button><h1 class="title" id="hostTitle">Play Online</h1>
+<div class="grid">
+ <div class="card">
+  <h3>Choose a question set</h3><div id="selectedSetCard" class="selectedSetCard"></div><div id="hostMySets"></div><button class="discoverBtn" onclick="show('discover')">🌎 Discover Sets</button>
+  <h3>Game mode</h3><select id="hostMode"><option value="Gold Wars">Gold Wars</option><option value="Crazy Casting">Crazy Casting</option><option value="Heated Hackers">Heated Hackers</option><option value="Study">Study</option></select>
+  <h3>How long do you want to play?</h3>
+  <div style="display:flex;gap:10px;align-items:center"><input id="playMinutes" type="number" min="1" max="180" value="5" step="1" placeholder="Minutes"><b>minutes</b></div>
+  <div id="botSetup"><h3>Number of AI bots</h3><input id="botCount" type="number" min="4" max="20" value="5" step="1"><p class="small">Minimum 4 bots.</p></div>
+  <p class="small">Questions keep coming randomly until the timer reaches zero.</p>
+  <button class="primary" id="startGameBtn" onclick="startSoloGame()">▶ Start Game</button>
+ </div>
+ <div class="card"><h3>How Gold Wars works</h3><p>Answer correctly to earn <b>3 tokens</b>, then the chest opens automatically.</p><p>🎁 The chest can contain gold, a multiplier, or 🦹‍♂️ STEAL.</p><p class="small">Gold is separate from your <img class="coinIcon tiny" src="quizblox-coin.png" alt="Bloxcoin"> token shop currency.</p></div>
+</div></section>
+
+<section id="play" class="view" onclick="crazyCastClick(event)">
+<div class="grid">
+ <div><div class="pill">Mode: <b id="playMode">Gold Wars</b></div></div>
+ <div class="pill" style="text-align:right">Time left: <b id="timeLeft">0:00</b></div>
+</div>
+<div class="bar" style="margin:15px 0"><i id="timebar"></i></div>
+<div id="crazyCastingScene" class="crazyCastingScene" style="display:none" ></div>
+<div id="hackerPasswordGate" class="question hackerGate" style="display:none"><div class="hackerIcon">💻</div><h2>HEATED HACKERS</h2><p>Choose a password. Keep it secret — other players may try to hack you.</p><input id="hackerPasswordInput" type="text" maxlength="24" placeholder="Enter your password" autocomplete="off"><button class="primary hackerStartBtn" onclick="submitHackerPassword()">🔐 Lock In Password</button></div>
+<div id="hackerBoxArea" class="question hackerBoxes" style="display:none"><div class="small">Move your mouse onto a box. The box you are touching when the timer reaches 0 is selected.</div><div id="hackerBoxTimer" class="hackerBoxTimer">3.0</div><div class="hackerBoxHint">No box touched = no reward</div><h2>❓ ❓ ❓</h2><div class="hackerBoxGrid"><button type="button" data-box="0">❓<span>1</span></button><button type="button" data-box="1">❓<span>2</span></button><button type="button" data-box="2">❓<span>3</span></button></div></div>
+<div id="normalQuestionArea" class="question"><div class="small" id="qcat"></div><h2 id="questionText"></h2><div class="answers" id="answers"></div></div>
+<div class="grid" style="margin-top:18px">
+ <div class="card"><h3>📈 Your run</h3><p>Correct: <b id="correctCount">0</b></p><p><img class="coinIcon tiny" src="quizblox-coin.png" alt="Bloxcoin"> Tokens earned: <b id="earnedNow">0</b></p><p>💰 <span id="currencyLabel">Gold</span>: <b id="goldNow">0</b></p><p id="lureStatus" style="display:none">🎣 Lure: <b>Upgraded</b></p></div>
+</div>
+</section>
+
+<section id="chests" class="view">
+ <div class="center"><h1 class="title">🎁 Gold Wars</h1><p>The treasure chest opens automatically after 1 second.</p></div>
+ <div id="chestGrid" class="singleChestArea"></div>
+ <div class="center"><p>Time left: <b id="chestTime">0:00</b></p></div>
+</section>
+
+<section id="market" class="view"><button class="back muted" onclick="show('home')">← Back</button><h1 class="title">Market</h1><p class="small">Spend tokens to open boxes. Duplicate Blox still give a small token rebate.</p><div class="grid" id="boxes"></div></section>
+
+<section id="collection" class="view"><button class="back muted" onclick="show('home')">← Back</button><h1 class="title">My Blox</h1><div class="card" style="margin-bottom:18px">Collected: <b id="countBlox">0</b> / <span id="totalBlox">0</span> &nbsp; • &nbsp; Equipped: <span id="equipped">—</span></div><div id="blookColumns" class="packColumns"></div><div id="hiddenBloxSection" style="display:none;margin-top:18px"><h2>✨ Hidden Blox</h2><p class="small">Exotic hidden Blox are discovered through secret pack drops and special methods.</p><div id="hiddenBloxColumns" class="packColumns"></div></div></section>
+
+<section id="sets" class="view"><button class="back muted" onclick="show('home')">← Back</button><h1 class="title">📚 My Sets</h1><p class="small">Only sets you have created or saved appear here. Built-in sets are in Discover.</p><div class="grid" id="setGrid"></div></section>
+
+<section id="createSet" class="view"><button class="back muted" onclick="show('home')">← Back</button><h1 class="title">✏️ Create Your Own Set</h1><div class="grid"><div class="card"><h3>Set name</h3><input id="newSetTitle" maxlength="60" placeholder="My Quiz Set"><p class="small">For each question, enter the question and answers below. The first answer is treated as the correct answer.</p><h3>Question</h3><textarea id="newQ" placeholder="Write your question..."></textarea><h3>Answers</h3><textarea id="newAnswers" placeholder="Correct answer first
+Wrong answer
+Wrong answer
+Wrong answer"></textarea><button class="primary" onclick="addQuestion()">➕ Add Question</button></div><div class="card"><h3>Questions in this set</h3><div id="draftList"><p class="small">No draft questions yet.</p></div><button class="primary" onclick="saveSet()">💾 Save Set</button></div></div></section>
+
+<section id="discover" class="view">
+<button class="back muted" onclick="show('host')">← Back</button><h1 class="title">🌎 Discover Sets</h1><p class="small">Browse sets in a random order. Open a set to preview its questions without seeing the answers.</p>
+<div id="discoverList" class="grid"></div>
+<div id="discoverDetail" style="display:none"></div>
+</section>
+
+<section id="results" class="view"><button class="back muted" onclick="show('home')">← Back</button><h1 class="title">Reports</h1><div class="grid"><div class="card center"><div class="stat" id="lastScore">0</div><div class="small" id="resultsCurrencyLabel">Gold collected</div></div><div class="card center"><div class="stat" id="lastAcc">0%</div><div class="small">Accuracy</div></div><div class="card center"><div class="stat" id="lastTokens">0</div><div class="small">Tokens earned</div></div></div><div class="card" style="margin-top:18px"><h3>Question performance</h3><div id="reportRows"></div></div></section>
+</main>
+
+<div id="bloxDetail"><button class="bloxDetailClose" onclick="closeBloxDetail()">✕</button><div id="bloxDetailImg" class="bloxDetailImg"></div><div id="bloxDetailName" class="bloxDetailName"></div><div id="bloxDetailRarity" class="bloxDetailRarity"></div></div>
+<div class="modal" id="modal"><div class="modalbox"><div id="modalContent"></div><button class="primary" onclick="closeModal()">Continue</button></div></div>
+<div class="toast" id="toast"></div>
+<div id="gameLeaderboard"><div class="gameLeadTitle" id="gameLeaderboardTitle">🏆 Gold Leaderboard</div><div id="gameLeaderboardRows"></div></div>
+<div class="countdown" id="countdown"><div id="countdownNum" class="countdownNum">3</div></div><div class="wrongCountdown" id="wrongCountdown"><div id="wrongCountdownNum" class="wrongCountdownNum">3</div></div>
+<div id="treasureGoldDisplay"><div class="goldLabel" id="bigCurrencyLabel">💰 TREASURE GOLD</div><div class="goldAmount" id="bigGoldAmount">0</div></div>
+<div id="stealOverlay" class="stealOverlay" aria-hidden="true"><div class="stealMessage" id="stealMessage">CLICK THE CASH! 💸</div><div class="stealCash" id="stealCash">💸</div><div class="stealTimerText" id="stealTimerText">5.0</div></div>
+<div id="swapOverlay" class="swapOverlay" aria-hidden="true">
+  <div class="swapCard">
+    <div class="swapTitle">🔄 GOLD SWAP!</div>
+    <div class="swapStage">
+      <div class="swapPlayer spinLeft">
+        <div class="swapPlayerLabel">YOUR BLOX</div>
+        <div class="swapBlox spinBlox" id="swapYourBlox">👤</div>
+        <div class="swapName" id="swapYourName">You</div>
+      </div>
+      <div class="swapArrow">⇄</div>
+      <div class="swapPlayer spinRight">
+        <div class="swapPlayerLabel">THEIR BLOX</div>
+        <div class="swapBlox spinBlox" id="swapTheirBlox">👤</div>
+        <div class="swapName" id="swapTheirName">Player</div>
+      </div>
+    </div>
+    <div class="swapDone">Gold swapped! ✨</div>
+  </div>
+</div>
+<div id="cryptoRewardOverlay" class="cryptoRewardOverlay" aria-hidden="true">
+  <div class="cryptoRewardCard">
+    <div class="cryptoRewardLabel">© CRYPTO REWARD</div>
+    <div class="cryptoRewardBig" id="cryptoRewardBig">+10</div>
+    <div class="cryptoRewardSub" id="cryptoRewardSub">Crypto</div>
+  </div>
+</div>
+<div id="adminPanel"><input id="adminCommand" list="adminCommandOptions" type="text" autocomplete="off" placeholder="Admin command..." /><datalist id="adminCommandOptions"></datalist><p class="small">Try /giveblox followed by a Blox name.</p></div>
+
+<script>
+const flagCountries=[["Afghanistan", "AF"], ["Albania", "AL"], ["Algeria", "DZ"], ["Andorra", "AD"], ["Angola", "AO"], ["Antigua and Barbuda", "AG"], ["Argentina", "AR"], ["Armenia", "AM"], ["Australia", "AU"], ["Austria", "AT"], ["Azerbaijan", "AZ"], ["Bahamas", "BS"], ["Bahrain", "BH"], ["Bangladesh", "BD"], ["Barbados", "BB"], ["Belarus", "BY"], ["Belgium", "BE"], ["Belize", "BZ"], ["Benin", "BJ"], ["Bhutan", "BT"], ["Bolivia", "BO"], ["Bosnia and Herzegovina", "BA"], ["Botswana", "BW"], ["Brazil", "BR"], ["Brunei", "BN"], ["Bulgaria", "BG"], ["Burkina Faso", "BF"], ["Burundi", "BI"], ["Cabo Verde", "CV"], ["Cambodia", "KH"], ["Cameroon", "CM"], ["Canada", "CA"], ["Central African Republic", "CF"], ["Chad", "TD"], ["Chile", "CL"], ["China", "CN"], ["Colombia", "CO"], ["Comoros", "KM"], ["Congo", "CG"], ["Democratic Republic of the Congo", "CD"], ["Costa Rica", "CR"], ["Côte d'Ivoire", "CI"], ["Croatia", "HR"], ["Cuba", "CU"], ["Cyprus", "CY"], ["Czechia", "CZ"], ["Denmark", "DK"], ["Djibouti", "DJ"], ["Dominica", "DM"], ["Dominican Republic", "DO"], ["Ecuador", "EC"], ["Egypt", "EG"], ["El Salvador", "SV"], ["Equatorial Guinea", "GQ"], ["Eritrea", "ER"], ["Estonia", "EE"], ["Eswatini", "SZ"], ["Ethiopia", "ET"], ["Fiji", "FJ"], ["Finland", "FI"], ["France", "FR"], ["Gabon", "GA"], ["Gambia", "GM"], ["Georgia", "GE"], ["Germany", "DE"], ["Ghana", "GH"], ["Greece", "GR"], ["Grenada", "GD"], ["Guatemala", "GT"], ["Guinea", "GN"], ["Guinea-Bissau", "GW"], ["Guyana", "GY"], ["Haiti", "HT"], ["Honduras", "HN"], ["Hungary", "HU"], ["Iceland", "IS"], ["India", "IN"], ["Indonesia", "ID"], ["Iran", "IR"], ["Iraq", "IQ"], ["Ireland", "IE"], ["Israel", "IL"], ["Italy", "IT"], ["Jamaica", "JM"], ["Japan", "JP"], ["Jordan", "JO"], ["Kazakhstan", "KZ"], ["Kenya", "KE"], ["Kiribati", "KI"], ["Kuwait", "KW"], ["Kyrgyzstan", "KG"], ["Laos", "LA"], ["Latvia", "LV"], ["Lebanon", "LB"], ["Lesotho", "LS"], ["Liberia", "LR"], ["Libya", "LY"], ["Liechtenstein", "LI"], ["Lithuania", "LT"], ["Luxembourg", "LU"], ["Madagascar", "MG"], ["Malawi", "MW"], ["Malaysia", "MY"], ["Maldives", "MV"], ["Mali", "ML"], ["Malta", "MT"], ["Marshall Islands", "MH"], ["Mauritania", "MR"], ["Mauritius", "MU"], ["Mexico", "MX"], ["Micronesia", "FM"], ["Moldova", "MD"], ["Monaco", "MC"], ["Mongolia", "MN"], ["Montenegro", "ME"], ["Morocco", "MA"], ["Mozambique", "MZ"], ["Myanmar", "MM"], ["Namibia", "NA"], ["Nauru", "NR"], ["Nepal", "NP"], ["Netherlands", "NL"], ["New Zealand", "NZ"], ["Nicaragua", "NI"], ["Niger", "NE"], ["Nigeria", "NG"], ["North Korea", "KP"], ["North Macedonia", "MK"], ["Norway", "NO"], ["Oman", "OM"], ["Pakistan", "PK"], ["Palestine", "PS"], ["Palau", "PW"], ["Panama", "PA"], ["Papua New Guinea", "PG"], ["Paraguay", "PY"], ["Peru", "PE"], ["Philippines", "PH"], ["Poland", "PL"], ["Portugal", "PT"], ["Qatar", "QA"], ["Romania", "RO"], ["Russia", "RU"], ["Rwanda", "RW"], ["Saint Kitts and Nevis", "KN"], ["Saint Lucia", "LC"], ["Saint Vincent and the Grenadines", "VC"], ["Samoa", "WS"], ["San Marino", "SM"], ["Sao Tome and Principe", "ST"], ["Saudi Arabia", "SA"], ["Senegal", "SN"], ["Serbia", "RS"], ["Seychelles", "SC"], ["Sierra Leone", "SL"], ["Singapore", "SG"], ["Slovakia", "SK"], ["Slovenia", "SI"], ["Solomon Islands", "SB"], ["Somalia", "SO"], ["South Africa", "ZA"], ["South Korea", "KR"], ["South Sudan", "SS"], ["Spain", "ES"], ["Sri Lanka", "LK"], ["Sudan", "SD"], ["Suriname", "SR"], ["Sweden", "SE"], ["Switzerland", "CH"], ["Syria", "SY"], ["Tajikistan", "TJ"], ["Tanzania", "TZ"], ["Thailand", "TH"], ["Timor-Leste", "TL"], ["Togo", "TG"], ["Tonga", "TO"], ["Trinidad and Tobago", "TT"], ["Tunisia", "TN"], ["Turkey", "TR"], ["Turkmenistan", "TM"], ["Tuvalu", "TV"], ["Uganda", "UG"], ["Ukraine", "UA"], ["United Arab Emirates", "AE"], ["United Kingdom", "GB"], ["United States", "US"], ["Uruguay", "UY"], ["Uzbekistan", "UZ"], ["Vanuatu", "VU"], ["Vatican City", "VA"], ["Venezuela", "VE"], ["Vietnam", "VN"], ["Yemen", "YE"], ["Zambia", "ZM"], ["Zimbabwe", "ZW"]];
+function flagImageUrl(code){return `https://flagcdn.com/w640/${code.toLowerCase()}.png`}
+function makeFlagQuestions(){return flagCountries.map(([name,code],idx)=>{let opts=[name];let seed=idx+17;while(opts.length<4){seed=(seed*9301+49297)%233280;let other=flagCountries[seed%flagCountries.length][0];if(!opts.includes(other))opts.push(other)}for(let i=opts.length-1;i>1;i--){let j=(seed+i*17)%i+1;[opts[i],opts[j]]=[opts[j],opts[i]]}let correctIndex=opts.indexOf(name);if(correctIndex>0)[opts[0],opts[correctIndex]]=[opts[correctIndex],opts[0]];return {q:"Which country's flag is shown?",a:opts,cat:"Guess the Flag",flagImage:flagImageUrl(code),flagCountry:name}})}
+
+let defaultSets=[
+{title:"Disney",questions:[{q:"Who is Mickey Mouse's girlfriend?",a:["Minnie Mouse", "Daisy Duck", "Belle", "Elsa"],cat:"Disney"},{q:"What is the name of Elsa's sister?",a:["Anna", "Moana", "Rapunzel", "Merida"],cat:"Disney"},{q:"Which Disney film features Simba?",a:["The Lion King", "Aladdin", "Mulan", "Tarzan"],cat:"Disney"},{q:"What type of animal is Dumbo?",a:["Elephant", "Mouse", "Lion", "Dog"],cat:"Disney"},{q:"Who is the main character in Moana?",a:["Moana", "Tiana", "Jasmine", "Ariel"],cat:"Disney"},{q:"Which character has a magic carpet?",a:["Aladdin", "Woody", "Stitch", "Peter Pan"],cat:"Disney"},{q:"What is the name of the snowman in Frozen?",a:["Olaf", "Sven", "Kristoff", "Hans"],cat:"Disney"},{q:"Which Disney character is a cowboy toy?",a:["Woody", "Buzz Lightyear", "Nemo", "Remy"],cat:"Disney"},{q:"What is Ariel in The Little Mermaid?",a:["A mermaid", "A fairy", "A witch", "A princess of ice"],cat:"Disney"},{q:"Which film features a magical house called the Madrigal home?",a:["Encanto", "Coco", "Luca", "Raya and the Last Dragon"],cat:"Disney"}]},
+{title:"Math",questions:[{q:"What is 12 × 8?",a:["96", "86", "108", "92"],cat:"Math"},{q:"What is 144 ÷ 12?",a:["12", "10", "14", "16"],cat:"Math"},{q:"What is 25% of 80?",a:["20", "15", "25", "30"],cat:"Math"},{q:"What is 7²?",a:["49", "14", "42", "56"],cat:"Math"},{q:"What is 3/4 as a decimal?",a:["0.75", "0.25", "0.5", "0.8"],cat:"Math"},{q:"What is 15 + 27?",a:["42", "41", "43", "52"],cat:"Math"},{q:"What is 1000 − 375?",a:["625", "675", "575", "725"],cat:"Math"},{q:"What is 9 × 11?",a:["99", "88", "101", "91"],cat:"Math"},{q:"What is the perimeter of a square with side 6?",a:["24", "12", "36", "18"],cat:"Math"},{q:"What is 2.5 + 1.75?",a:["4.25", "3.25", "4.15", "5.25"],cat:"Math"}]},
+{title:"Space",questions:[{q:"Which planet is closest to the Sun?",a:["Mercury", "Venus", "Earth", "Mars"],cat:"Space"},{q:"What is Earth's natural satellite?",a:["The Moon", "The Sun", "Mars", "Europa"],cat:"Space"},{q:"Which planet is famous for its rings?",a:["Saturn", "Mars", "Venus", "Mercury"],cat:"Space"},{q:"What galaxy contains our Solar System?",a:["Milky Way", "Andromeda", "Whirlpool", "Sombrero"],cat:"Space"},{q:"What is a star mainly made of?",a:["Hot plasma", "Ice", "Rock", "Liquid water"],cat:"Space"},{q:"Which planet is the largest in our Solar System?",a:["Jupiter", "Saturn", "Earth", "Neptune"],cat:"Space"},{q:"What force keeps planets in orbit?",a:["Gravity", "Friction", "Sound", "Electricity"],cat:"Space"},{q:"What do astronauts wear outside a spacecraft?",a:["Spacesuits", "Raincoats", "Swimsuits", "Lab coats"],cat:"Space"},{q:"Which planet is known as the Red Planet?",a:["Mars", "Jupiter", "Neptune", "Venus"],cat:"Space"},{q:"What is the name of our star?",a:["The Sun", "Sirius", "Polaris", "Vega"],cat:"Space"}]},
+{title:"General Knowledge",questions:[{q:"What is the capital of Australia?",a:["Canberra", "Sydney", "Melbourne", "Perth"],cat:"General Knowledge"},{q:"How many days are in a leap year?",a:["366", "365", "364", "367"],cat:"General Knowledge"},{q:"What is the largest ocean?",a:["Pacific Ocean", "Atlantic Ocean", "Indian Ocean", "Arctic Ocean"],cat:"General Knowledge"},{q:"How many sides does a hexagon have?",a:["6", "5", "7", "8"],cat:"General Knowledge"},{q:"Which gas do humans breathe in to survive?",a:["Oxygen", "Helium", "Carbon dioxide", "Hydrogen"],cat:"General Knowledge"},{q:"Which instrument has black and white keys?",a:["Piano", "Trumpet", "Drum", "Violin"],cat:"General Knowledge"},{q:"What is the fastest land animal?",a:["Cheetah", "Lion", "Horse", "Kangaroo"],cat:"General Knowledge"},{q:"How many continents are commonly taught?",a:["7", "5", "6", "8"],cat:"General Knowledge"},{q:"Which language is primarily spoken in Brazil?",a:["Portuguese", "Spanish", "French", "Italian"],cat:"General Knowledge"},{q:"What is H2O commonly called?",a:["Water", "Oxygen", "Hydrogen", "Salt"],cat:"General Knowledge"}]},
+{title:"Angles",questions:[{q:"How many degrees are in a right angle?",a:["90°", "45°", "180°", "360°"],cat:"Angles"},{q:"How many degrees are in a straight angle?",a:["180°", "90°", "270°", "360°"],cat:"Angles"},{q:"An angle smaller than 90° is called what?",a:["Acute", "Obtuse", "Reflex", "Straight"],cat:"Angles"},{q:"An angle between 90° and 180° is called what?",a:["Obtuse", "Acute", "Right", "Straight"],cat:"Angles"},{q:"How many degrees are in a full turn?",a:["360°", "180°", "90°", "270°"],cat:"Angles"},{q:"What is 35° + 55°?",a:["90°", "80°", "100°", "75°"],cat:"Angles"},{q:"What is 180° − 120°?",a:["60°", "50°", "70°", "80°"],cat:"Angles"},{q:"What is half of a right angle?",a:["45°", "30°", "60°", "90°"],cat:"Angles"},{q:"What is the sum of angles in a triangle?",a:["180°", "90°", "270°", "360°"],cat:"Angles"},{q:"What is a 200° angle called?",a:["Reflex", "Acute", "Right", "Obtuse"],cat:"Angles"}]},
+{title:"Sports",questions:[{q:"How many players are on the field for one soccer team?",a:["11", "9", "10", "12"],cat:"Sports"},{q:"Which sport uses a bat and wickets?",a:["Cricket", "Tennis", "Hockey", "Basketball"],cat:"Sports"},{q:"How many points is a basketball free throw worth?",a:["1", "2", "3", "4"],cat:"Sports"},{q:"Which sport is played at Wimbledon?",a:["Tennis", "Golf", "Rugby", "Cricket"],cat:"Sports"},{q:"What shape is a rugby ball?",a:["Oval", "Square", "Triangle", "Circle"],cat:"Sports"},{q:"How many rings are on the Olympic symbol?",a:["5", "4", "6", "7"],cat:"Sports"},{q:"Which sport uses a shuttlecock?",a:["Badminton", "Baseball", "Swimming", "Boxing"],cat:"Sports"},{q:"In swimming, what is a pool lane used for?",a:["A swimmer's racing space", "A goal", "A net", "A scoreboard"],cat:"Sports"},{q:"Which Australian sport is played with an oval-shaped ball?",a:["Australian rules football", "Tennis", "Golf", "Volleyball"],cat:"Sports"},{q:"What sport is associated with the Tour de France?",a:["Cycling", "Running", "Skiing", "Rowing"],cat:"Sports"}]},
+{title:"Animals",questions:[{q:"What is the largest land animal?",a:["African elephant", "Giraffe", "Rhino", "Hippo"],cat:"Animals"},{q:"Which animal is known for changing colour?",a:["Chameleon", "Zebra", "Elephant", "Penguin"],cat:"Animals"},{q:"What is a baby frog called?",a:["Tadpole", "Cub", "Calf", "Foal"],cat:"Animals"},{q:"Which animal is the fastest in the air?",a:["Peregrine falcon", "Eagle", "Owl", "Albatross"],cat:"Animals"},{q:"What do pandas mainly eat?",a:["Bamboo", "Grass", "Fish", "Berries"],cat:"Animals"},{q:"Which animal has a pouch for carrying young?",a:["Kangaroo", "Tiger", "Wolf", "Penguin"],cat:"Animals"},{q:"How many legs does a spider have?",a:["8", "6", "10", "12"],cat:"Animals"},{q:"Which mammal can truly fly?",a:["Bat", "Flying squirrel", "Koala", "Platypus"],cat:"Animals"},{q:"What is a group of lions called?",a:["Pride", "Pack", "Herd", "Flock"],cat:"Animals"},{q:"Which bird cannot fly and lives in Antarctica?",a:["Penguin", "Eagle", "Swan", "Parrot"],cat:"Animals"}]},
+{title:"Science",questions:[{q:"What is the centre of an atom called?",a:["Nucleus", "Cell", "Core shell", "Electron"],cat:"Science"},{q:"What process do plants use to make food?",a:["Photosynthesis", "Digestion", "Respiration", "Evaporation"],cat:"Science"},{q:"What is the chemical symbol for oxygen?",a:["O", "O2", "Ox", "C"],cat:"Science"},{q:"What organ pumps blood around the body?",a:["Heart", "Lung", "Liver", "Kidney"],cat:"Science"},{q:"What state of matter has a fixed shape?",a:["Solid", "Liquid", "Gas", "Plasma only"],cat:"Science"},{q:"What force pulls objects toward Earth?",a:["Gravity", "Magnetism", "Friction", "Buoyancy"],cat:"Science"},{q:"What is the boiling point of water at sea level?",a:["100°C", "90°C", "50°C", "120°C"],cat:"Science"},{q:"What part of a plant absorbs most water?",a:["Roots", "Flowers", "Fruit", "Leaves"],cat:"Science"},{q:"Which vitamin is commonly produced in skin with sunlight?",a:["Vitamin D", "Vitamin C", "Vitamin B12", "Vitamin K"],cat:"Science"},{q:"What is the smallest unit of life?",a:["Cell", "Atom", "Organ", "Tissue"],cat:"Science"}]},
+{title:"Geography",questions:[{q:"Which country is shaped like a boot?",a:["Italy", "Greece", "Chile", "India"],cat:"Geography"},{q:"What is the largest country by area?",a:["Russia", "Canada", "China", "USA"],cat:"Geography"},{q:"Which continent is Egypt in?",a:["Africa", "Asia", "Europe", "South America"],cat:"Geography"},{q:"What is the capital of Japan?",a:["Tokyo", "Kyoto", "Osaka", "Hiroshima"],cat:"Geography"},{q:"Which river is famous for flowing through Egypt?",a:["Nile", "Amazon", "Danube", "Yangtze"],cat:"Geography"},{q:"Which country has the city of Paris?",a:["France", "Spain", "Belgium", "Portugal"],cat:"Geography"},{q:"What is the world's largest hot desert?",a:["Sahara", "Gobi", "Kalahari", "Atacama"],cat:"Geography"},{q:"Which ocean is east of Africa?",a:["Indian Ocean", "Atlantic Ocean", "Pacific Ocean", "Arctic Ocean"],cat:"Geography"},{q:"What is the capital of New Zealand?",a:["Wellington", "Auckland", "Christchurch", "Hamilton"],cat:"Geography"},{q:"Which continent is Brazil in?",a:["South America", "North America", "Africa", "Europe"],cat:"Geography"}]},
+{title:"History",questions:[{q:"Which ancient civilization built the pyramids at Giza?",a:["Ancient Egyptians", "Romans", "Vikings", "Aztecs"],cat:"History"},{q:"Who was the first person to walk on the Moon?",a:["Neil Armstrong", "Buzz Aldrin", "Yuri Gagarin", "John Glenn"],cat:"History"},{q:"Which ship famously sank in 1912?",a:["Titanic", "Endeavour", "Mayflower", "Beagle"],cat:"History"},{q:"The Roman Empire was centred around which city?",a:["Rome", "Athens", "Paris", "London"],cat:"History"},{q:"Which wall divided Berlin during the Cold War?",a:["Berlin Wall", "Hadrian's Wall", "Great Wall", "Antonine Wall"],cat:"History"},{q:"Who was known as the Maid of Orléans?",a:["Joan of Arc", "Cleopatra", "Boudica", "Marie Curie"],cat:"History"},{q:"Which ancient people developed democracy in Athens?",a:["Greeks", "Romans", "Persians", "Egyptians"],cat:"History"},{q:"What was the name of the medieval plague pandemic?",a:["Black Death", "Red Fever", "Great Flu", "Iron Plague"],cat:"History"},{q:"Which explorer's expedition is associated with the first circumnavigation?",a:["Ferdinand Magellan", "Marco Polo", "James Cook", "Christopher Columbus"],cat:"History"},{q:"Which country gifted the Statue of Liberty to the USA?",a:["France", "Spain", "Italy", "Canada"],cat:"History"}]},
+{title:"Technology",questions:[{q:"What does CPU stand for?",a:["Central Processing Unit", "Computer Power Utility", "Core Program Unit", "Central Program User"],cat:"Technology"},{q:"Which company created Windows?",a:["Microsoft", "Nintendo", "Sony", "Apple"],cat:"Technology"},{q:"What does Wi-Fi allow devices to do?",a:["Connect wirelessly to a network", "Print without ink", "Charge instantly", "Run without power"],cat:"Technology"},{q:"What is a web browser used for?",a:["Viewing websites", "Editing physical photos", "Charging a phone", "Cooking recipes automatically"],cat:"Technology"},{q:"Which device is commonly used to move a pointer on a PC?",a:["Mouse", "Router", "Printer", "Speaker"],cat:"Technology"},{q:"What does USB commonly connect?",a:["Electronic devices", "Water pipes", "Car engines", "Books"],cat:"Technology"},{q:"Which company makes the PlayStation?",a:["Sony", "Microsoft", "Nintendo", "Sega"],cat:"Technology"},{q:"What does AI stand for?",a:["Artificial Intelligence", "Automated Internet", "Advanced Input", "Applied Information"],cat:"Technology"},{q:"Which storage unit is larger?",a:["Gigabyte", "Kilobyte", "Byte", "Bit"],cat:"Technology"},{q:"What does HTML mainly describe?",a:["The structure of web pages", "A graphics card", "A Wi-Fi signal", "A game controller"],cat:"Technology"}]},
+{title:"Food",questions:[{q:"What fruit is traditionally used to make guacamole?",a:["Avocado", "Apple", "Banana", "Orange"],cat:"Food"},{q:"Which food is made from curdled milk?",a:["Cheese", "Bread", "Rice", "Pasta"],cat:"Food"},{q:"What is the main ingredient in sushi rice?",a:["Rice", "Wheat", "Corn", "Potato"],cat:"Food"},{q:"Which fruit is yellow and curved?",a:["Banana", "Pear", "Plum", "Kiwi"],cat:"Food"},{q:"What vegetable is commonly used to make chips/fries?",a:["Potato", "Carrot", "Spinach", "Celery"],cat:"Food"},{q:"Which drink is made from tea leaves?",a:["Tea", "Lemonade", "Milkshake", "Hot chocolate"],cat:"Food"},{q:"What is pasta traditionally made from?",a:["Wheat", "Cocoa", "Rice only", "Potato only"],cat:"Food"},{q:"Which food is commonly associated with bees?",a:["Honey", "Cheese", "Bread", "Jam"],cat:"Food"},{q:"What fruit has a hard shell and green/brown skin?",a:["Coconut", "Grape", "Cherry", "Peach"],cat:"Food"},{q:"Which spice is commonly yellow and used in curry?",a:["Turmeric", "Vanilla", "Cinnamon", "Mint"],cat:"Food"}]},
+{title:"Movies",questions:[{q:"Which movie features a character named Buzz Lightyear?",a:["Toy Story", "Shrek", "Avatar", "Jaws"],cat:"Movies"},{q:"Which movie features a young wizard named Harry?",a:["Harry Potter", "The Matrix", "Rocky", "Cars"],cat:"Movies"},{q:"Which film has a character named Nemo?",a:["Finding Nemo", "Up", "Frozen", "Moana"],cat:"Movies"},{q:"Which movie features a green ogre?",a:["Shrek", "Cars", "Titanic", "Interstellar"],cat:"Movies"},{q:"Which film features dinosaurs brought back through science?",a:["Jurassic Park", "The Lion King", "Coco", "Paddington"],cat:"Movies"},{q:"Which film follows a family travelling through space to find a new home?",a:["Interstellar", "Toy Story", "The Mask", "Jumanji"],cat:"Movies"},{q:"Which superhero film features Wakanda?",a:["Black Panther", "Superman", "Ant-Man", "Thor"],cat:"Movies"},{q:"Which movie features a race car named Lightning McQueen?",a:["Cars", "Planes", "Turbo", "Speed"],cat:"Movies"},{q:"Which film features a magical nanny named Mary Poppins?",a:["Mary Poppins", "Matilda", "Annie", "Paddington"],cat:"Movies"},{q:"Which film features a talking snowman named Olaf?",a:["Frozen", "Brave", "Tangled", "Encanto"],cat:"Movies"}]},
+{title:"Music",questions:[{q:"How many strings does a standard guitar usually have?",a:["6", "4", "5", "8"],cat:"Music"},{q:"Which instrument has black and white keys?",a:["Piano", "Flute", "Trumpet", "Drum"],cat:"Music"},{q:"What family does the violin belong to?",a:["String", "Brass", "Percussion", "Woodwind"],cat:"Music"},{q:"How many beats are commonly in a 4/4 bar?",a:["4", "3", "5", "8"],cat:"Music"},{q:"Which instrument is played with sticks and drums?",a:["Drum kit", "Violin", "Flute", "Harp"],cat:"Music"},{q:"What is a group of singers called?",a:["Choir", "Orchestra", "Bandstand", "Duo only"],cat:"Music"},{q:"Which instrument commonly has a mouthpiece and valves?",a:["Trumpet", "Piano", "Harp", "Violin"],cat:"Music"},{q:"What is the person who leads an orchestra called?",a:["Conductor", "Referee", "Director of traffic", "Coach"],cat:"Music"},{q:"Which instrument is known for having pedals and many strings?",a:["Harp", "Clarinet", "Trumpet", "Drum"],cat:"Music"},{q:"What do musicians commonly read to perform a piece?",a:["Sheet music", "Map", "Blueprint", "Recipe"],cat:"Music"}]},
+{title:"Books & Literature",questions:[{q:"Who wrote Romeo and Juliet?",a:["William Shakespeare", "Charles Dickens", "J.K. Rowling", "Mark Twain"],cat:"Books & Literature"},{q:"Who wrote The Hobbit?",a:["J.R.R. Tolkien", "C.S. Lewis", "Roald Dahl", "George Orwell"],cat:"Books & Literature"},{q:"What is a story's main character called?",a:["Protagonist", "Narrator only", "Editor", "Publisher"],cat:"Books & Literature"},{q:"Which book features a character named Sherlock Holmes?",a:["The Adventures of Sherlock Holmes", "The Hobbit", "Oliver Twist", "The Jungle Book"],cat:"Books & Literature"},{q:"Who wrote Charlie and the Chocolate Factory?",a:["Roald Dahl", "Dr Seuss", "Enid Blyton", "Lewis Carroll"],cat:"Books & Literature"},{q:"Which fictional detective lives at 221B Baker Street?",a:["Sherlock Holmes", "Hercule Poirot", "Nancy Drew", "Batman"],cat:"Books & Literature"},{q:"Who wrote Alice's Adventures in Wonderland?",a:["Lewis Carroll", "Jules Verne", "Jane Austen", "A.A. Milne"],cat:"Books & Literature"},{q:"What is a book's list of chapters usually called?",a:["Table of contents", "Index only", "Glossary", "Appendix"],cat:"Books & Literature"},{q:"Which novel features the character Atticus Finch?",a:["To Kill a Mockingbird", "1984", "The Hobbit", "Pride and Prejudice"],cat:"Books & Literature"},{q:"What do we call a book that tells a person's life story written by someone else?",a:["Biography", "Autobiography", "Dictionary", "Atlas"],cat:"Books & Literature"}]},
+{title:"Space & Physics",questions:[{q:"What unit measures force?",a:["Newton", "Watt", "Volt", "Joule"],cat:"Space & Physics"},{q:"What unit measures electric current?",a:["Ampere", "Newton", "Metre", "Pascal"],cat:"Space & Physics"},{q:"What is speed equal to?",a:["Distance ÷ time", "Time ÷ distance", "Mass × time", "Force ÷ mass"],cat:"Space & Physics"},{q:"What type of energy is stored in a stretched spring?",a:["Elastic potential", "Thermal", "Nuclear", "Sound"],cat:"Space & Physics"},{q:"What happens to an object's weight on the Moon compared with Earth?",a:["It is lower", "It is higher", "It is exactly the same", "It becomes zero"],cat:"Space & Physics"},{q:"What does a light-year measure?",a:["Distance", "Time", "Mass", "Temperature"],cat:"Space & Physics"},{q:"What is the speed of light approximately?",a:["300,000 km/s", "30,000 km/s", "3,000 km/s", "3 million km/s"],cat:"Space & Physics"},{q:"What is inertia?",a:["Resistance to a change in motion", "A type of energy", "A force pulling down", "The speed of light"],cat:"Space & Physics"},{q:"Which particle has a negative electric charge?",a:["Electron", "Proton", "Neutron", "Photon"],cat:"Space & Physics"},{q:"Which particle has no electric charge?",a:["Neutron", "Proton", "Electron", "Ion"],cat:"Space & Physics"}]},
+{title:"Nature",questions:[{q:"What process turns water vapour into liquid water?",a:["Condensation", "Evaporation", "Melting", "Freezing"],cat:"Nature"},{q:"What is the largest rainforest?",a:["Amazon rainforest", "Congo rainforest", "Daintree rainforest", "Borneo rainforest"],cat:"Nature"},{q:"What do trees release during photosynthesis?",a:["Oxygen", "Helium", "Nitrogen only", "Methane"],cat:"Nature"},{q:"What is a habitat?",a:["The natural home of an organism", "A type of weather", "A food chain", "A planet"],cat:"Nature"},{q:"What is the layer of gases around Earth called?",a:["Atmosphere", "Lithosphere", "Hydrosphere", "Biosphere only"],cat:"Nature"},{q:"What causes tides mainly?",a:["Gravity of the Moon and Sun", "Wind only", "Rain", "Earthquakes only"],cat:"Nature"},{q:"What is the process of water falling from clouds?",a:["Precipitation", "Condensation", "Collection", "Transpiration"],cat:"Nature"},{q:"Which ecosystem has very little rainfall?",a:["Desert", "Rainforest", "Wetland", "Coral reef"],cat:"Nature"},{q:"What do decomposers do?",a:["Break down dead material", "Make sunlight", "Create rocks", "Stop rainfall"],cat:"Nature"},{q:"What is biodiversity?",a:["Variety of living things", "A type of weather", "A single species", "A type of soil"],cat:"Nature"}]},
+{title:"Australia",questions:[{q:"What is Australia's capital city?",a:["Canberra", "Sydney", "Melbourne", "Brisbane"],cat:"Australia"},{q:"What is Australia's largest city by population?",a:["Sydney", "Canberra", "Darwin", "Hobart"],cat:"Australia"},{q:"Which animal is a famous Australian marsupial?",a:["Kangaroo", "Tiger", "Panda", "Lion"],cat:"Australia"},{q:"Which reef lies off Queensland?",a:["Great Barrier Reef", "Ningaloo Reef only", "Mesoamerican Reef", "Red Sea Reef"],cat:"Australia"},{q:"Which Australian state is Tasmania part of?",a:["Tasmania is a state itself", "Victoria", "Queensland", "New South Wales"],cat:"Australia"},{q:"What is Australia's national currency?",a:["Australian dollar", "Pound", "Euro", "Yen"],cat:"Australia"},{q:"Which city is famous for the Sydney Opera House?",a:["Sydney", "Perth", "Adelaide", "Darwin"],cat:"Australia"},{q:"Which Australian bird is known for its large size and inability to fly?",a:["Emu", "Eagle", "Cockatoo", "Kookaburra"],cat:"Australia"},{q:"Which ocean is west of Australia?",a:["Indian Ocean", "Atlantic Ocean", "Arctic Ocean", "Southern Atlantic"],cat:"Australia"},{q:"What is Uluru?",a:["A large sandstone rock formation", "A river", "A reef", "A city"],cat:"Australia"}]},
+{title:"Video Games",questions:[{q:"Which company created Mario?",a:["Nintendo", "Sony", "Microsoft", "Sega"],cat:"Video Games"},{q:"What is the main character's name in Minecraft?",a:["Steve", "Mario", "Link", "Kirby"],cat:"Video Games"},{q:"Which game features Pikachu?",a:["Pokémon", "Minecraft", "Fortnite", "Roblox"],cat:"Video Games"},{q:"Which character is known for collecting rings?",a:["Sonic", "Mario", "Kirby", "Link"],cat:"Video Games"},{q:"What is the name of Link's princess in The Legend of Zelda?",a:["Zelda", "Peach", "Daisy", "Samus"],cat:"Video Games"},{q:"Which game features building with blocks and crafting?",a:["Minecraft", "Tetris", "FIFA", "Pac-Man"],cat:"Video Games"},{q:"Which game is famous for falling blocks?",a:["Tetris", "Fortnite", "Pokémon", "Animal Crossing"],cat:"Video Games"},{q:"Which company makes Xbox?",a:["Microsoft", "Nintendo", "Sony", "Valve"],cat:"Video Games"},{q:"Which game series features Master Chief?",a:["Halo", "Mario", "Zelda", "Kirby"],cat:"Video Games"},{q:"Which game features villagers and islands in a life-sim setting?",a:["Animal Crossing", "Halo", "Tetris", "Sonic"],cat:"Video Games"}]},
+{title:"Pokémon",questions:[{q:"What type is Pikachu?",a:["Electric", "Fire", "Water", "Grass"],cat:"Pokémon"},{q:"Which Pokémon is number 001 in the National Pokédex?",a:["Bulbasaur", "Charmander", "Squirtle", "Pikachu"],cat:"Pokémon"},{q:"What does Eevee have many of?",a:["Evolution possibilities", "Wings", "Tails only", "Arms"],cat:"Pokémon"},{q:"Which Pokémon is known as the Flame Pokémon?",a:["Charizard", "Blastoise", "Venusaur", "Snorlax"],cat:"Pokémon"},{q:"Which item is commonly used to catch Pokémon?",a:["Poké Ball", "Master Sword", "Super Star", "Triforce"],cat:"Pokémon"},{q:"What type is Squirtle?",a:["Water", "Fire", "Electric", "Rock"],cat:"Pokémon"},{q:"Which Pokémon evolves from Magikarp?",a:["Gyarados", "Lapras", "Dragonite", "Milotic"],cat:"Pokémon"},{q:"Which Pokémon is famous for sleeping?",a:["Snorlax", "Pidgey", "Zubat", "Abra"],cat:"Pokémon"},{q:"What is the first generation region called?",a:["Kanto", "Johto", "Hoenn", "Sinnoh"],cat:"Pokémon"},{q:"Which Pokémon is a fox-like Fire starter from Generation 6?",a:["Fennekin", "Treecko", "Tepig", "Litten"],cat:"Pokémon"}]},
+{title:"Logic",questions:[{q:"If all Bloops are Razzies and all Razzies are Lazzies, are all Bloops Lazzies?",a:["Yes", "No", "Only sometimes", "Impossible to tell"],cat:"Logic"},{q:"What comes next: 2, 4, 6, 8, ?",a:["10", "9", "12", "11"],cat:"Logic"},{q:"What comes next: 3, 6, 12, 24, ?",a:["48", "36", "30", "42"],cat:"Logic"},{q:"If today is Monday, what day is it in 7 days?",a:["Monday", "Sunday", "Tuesday", "Friday"],cat:"Logic"},{q:"Which does not belong: apple, banana, carrot, orange?",a:["Carrot", "Apple", "Banana", "Orange"],cat:"Logic"},{q:"A clock shows 3:00. What angle is between the hands?",a:["90°", "0°", "45°", "180°"],cat:"Logic"},{q:"If 5 machines make 5 items in 5 minutes, how long does 1 machine take to make 1 item?",a:["5 minutes", "1 minute", "25 minutes", "10 minutes"],cat:"Logic"},{q:"Which number is odd?",a:["17", "20", "24", "30"],cat:"Logic"},{q:"What comes next: A, C, E, G, ?",a:["I", "H", "J", "K"],cat:"Logic"},{q:"If a box has 3 red balls and 2 blue balls, how many balls are there?",a:["5", "6", "4", "3"],cat:"Logic"}]},
+{title:"English",questions:[{q:"Which word is a noun?",a:["House", "Quickly", "Run", "Blue"],cat:"English"},{q:"Which word is an adjective?",a:["Bright", "Jump", "Slowly", "Happiness"],cat:"English"},{q:"What punctuation ends a direct question?",a:["Question mark", "Full stop", "Comma", "Colon"],cat:"English"},{q:"What is the opposite of 'ancient'?",a:["Modern", "Old", "Historic", "Early"],cat:"English"},{q:"Which word is a verb?",a:["Swim", "Blue", "Table", "Happy"],cat:"English"},{q:"What is a synonym for 'large'?",a:["Big", "Tiny", "Short", "Narrow"],cat:"English"},{q:"What is a synonym for 'rapid'?",a:["Fast", "Slow", "Quiet", "Heavy"],cat:"English"},{q:"Which is correctly spelled?",a:["Necessary", "Necesary", "Neccessary", "Necassary"],cat:"English"},{q:"What is the plural of 'child'?",a:["Children", "Childs", "Childes", "Childrens"],cat:"English"},{q:"What is a metaphor?",a:["A comparison stated without using 'like' or 'as'", "A question", "A list", "A punctuation mark"],cat:"English"}]},
+{title:"Earth Science",questions:[{q:"What layer of Earth do we live on?",a:["Crust", "Outer core", "Inner core", "Mantle only"],cat:"Earth Science"},{q:"What causes earthquakes?",a:["Movement of Earth's crustal plates", "Clouds", "Ocean tides only", "Sunlight"],cat:"Earth Science"},{q:"What is molten rock below Earth's surface called?",a:["Magma", "Lava", "Ash", "Granite"],cat:"Earth Science"},{q:"What is molten rock at the surface called?",a:["Lava", "Magma", "Basalt only", "Steam"],cat:"Earth Science"},{q:"Which instrument measures earthquakes?",a:["Seismograph", "Thermometer", "Barometer", "Anemometer"],cat:"Earth Science"},{q:"What is the water cycle driven mainly by?",a:["The Sun's energy", "Moonlight", "Earth's core", "Wind alone"],cat:"Earth Science"},{q:"What type of rock forms from cooled magma or lava?",a:["Igneous", "Sedimentary", "Metamorphic", "Organic"],cat:"Earth Science"},{q:"What type of rock forms from layers of sediment?",a:["Sedimentary", "Igneous", "Metamorphic", "Volcanic glass"],cat:"Earth Science"},{q:"What is erosion?",a:["Wearing away and transport of Earth materials", "Rock melting only", "Cloud formation", "Earth's rotation"],cat:"Earth Science"},{q:"What is a volcano?",a:["An opening where magma and gases can reach the surface", "A type of cloud", "A deep ocean trench", "A glacier"],cat:"Earth Science"}]},
+{title:"Space Explorers",questions:[{q:"Which planet is called the Blue Planet?",a:["Earth", "Neptune", "Uranus", "Venus"],cat:"Space Explorers"},{q:"Which planet is farthest from the Sun?",a:["Neptune", "Uranus", "Saturn", "Mars"],cat:"Space Explorers"},{q:"What is the International Space Station?",a:["A space laboratory and living station", "A planet", "A telescope on the Moon", "A rocket"],cat:"Space Explorers"},{q:"What does a telescope help us observe?",a:["Distant objects in space", "Only underground rocks", "Only ocean animals", "Only weather"],cat:"Space Explorers"},{q:"What is a comet mainly made of?",a:["Ice, dust and rock", "Liquid metal", "Pure oxygen", "Wood"],cat:"Space Explorers"},{q:"What is a supernova?",a:["A powerful stellar explosion", "A new planet", "A black hole's surface", "A moon"],cat:"Space Explorers"},{q:"What is a black hole?",a:["A region with gravity so strong that light cannot escape", "An empty planet", "A dark cloud only", "A cold star"],cat:"Space Explorers"},{q:"What is a rover?",a:["A vehicle designed to explore another world", "A type of telescope", "A space suit", "A satellite dish"],cat:"Space Explorers"},{q:"What is a satellite?",a:["An object that orbits another object", "Only a rocket", "A type of star", "A meteor"],cat:"Space Explorers"},{q:"Which planet is known for its Great Red Spot?",a:["Jupiter", "Mars", "Saturn", "Venus"],cat:"Space Explorers"}]},
+{title:"Mixed Trivia",questions:[{q:"How many colours are traditionally in a rainbow?",a:["7", "5", "6", "8"],cat:"Mixed Trivia"},{q:"What is the capital of Canada?",a:["Ottawa", "Toronto", "Vancouver", "Montreal"],cat:"Mixed Trivia"},{q:"Which animal gives us wool?",a:["Sheep", "Cow", "Pig", "Horse"],cat:"Mixed Trivia"},{q:"What is 5 × 9?",a:["45", "40", "50", "35"],cat:"Mixed Trivia"},{q:"Which planet has the Great Red Spot?",a:["Jupiter", "Saturn", "Earth", "Mars"],cat:"Mixed Trivia"},{q:"Which sport uses a net and a ball over a high centre line?",a:["Volleyball", "Golf", "Cricket", "Boxing"],cat:"Mixed Trivia"},{q:"What is the largest organ of the human body?",a:["Skin", "Heart", "Liver", "Brain"],cat:"Mixed Trivia"},{q:"Which metal is liquid at room temperature?",a:["Mercury", "Iron", "Copper", "Gold"],cat:"Mixed Trivia"},{q:"How many hours are in a day?",a:["24", "12", "36", "48"],cat:"Mixed Trivia"},{q:"Which shape has three sides?",a:["Triangle", "Square", "Circle", "Pentagon"],cat:"Mixed Trivia"}]},
+{title:"Space & Science",questions:[{q:"What is the nearest planet to Earth on average among the planets?",a:["Mercury", "Venus", "Mars", "Jupiter"],cat:"Space & Science"},{q:"What is the chemical symbol for gold?",a:["Au", "Ag", "Gd", "Go"],cat:"Space & Science"},{q:"What is the freezing point of water?",a:["0°C", "10°C", "32°C", "-10°C"],cat:"Space & Science"},{q:"Which organ helps humans breathe?",a:["Lungs", "Stomach", "Heart", "Kidneys"],cat:"Space & Science"},{q:"What is Earth's outermost solid layer called?",a:["Crust", "Mantle", "Core", "Inner shell"],cat:"Space & Science"},{q:"Which planet rotates on its side?",a:["Uranus", "Mars", "Mercury", "Earth"],cat:"Space & Science"},{q:"What is the process of liquid water becoming vapour?",a:["Evaporation", "Condensation", "Freezing", "Melting"],cat:"Space & Science"},{q:"Which blood cells help fight infection?",a:["White blood cells", "Red blood cells", "Platelets", "Plasma"],cat:"Space & Science"},{q:"What is the unit of temperature commonly used in Australia?",a:["Celsius", "Fahrenheit", "Kelvin only", "Rankine"],cat:"Space & Science"},{q:"Which gas makes up most of Earth's atmosphere?",a:["Nitrogen", "Oxygen", "Carbon dioxide", "Helium"],cat:"Space & Science"}]},
+{title:"Famous Places",questions:[{q:"Where is the Eiffel Tower?",a:["Paris", "Rome", "London", "Berlin"],cat:"Famous Places"},{q:"Where is the Colosseum?",a:["Rome", "Athens", "Madrid", "Vienna"],cat:"Famous Places"},{q:"Where is the Statue of Liberty?",a:["New York City", "Los Angeles", "Chicago", "Boston"],cat:"Famous Places"},{q:"Where is the Great Wall?",a:["China", "Japan", "India", "Thailand"],cat:"Famous Places"},{q:"Where is Machu Picchu?",a:["Peru", "Brazil", "Mexico", "Chile"],cat:"Famous Places"},{q:"Where is the Taj Mahal?",a:["India", "Pakistan", "Nepal", "Bangladesh"],cat:"Famous Places"},{q:"Where is the Sydney Opera House?",a:["Sydney", "Melbourne", "Brisbane", "Perth"],cat:"Famous Places"},{q:"Where are the pyramids of Giza?",a:["Egypt", "Greece", "Turkey", "Morocco"],cat:"Famous Places"},{q:"Where is Mount Fuji?",a:["Japan", "China", "South Korea", "Indonesia"],cat:"Famous Places"},{q:"Where is Big Ben?",a:["London", "Dublin", "Paris", "Edinburgh"],cat:"Famous Places"}]},
+{title:"School Skills",questions:[{q:"What tool is best for measuring an angle?",a:["Protractor", "Ruler", "Compass only", "Scale"],cat:"School Skills"},{q:"What should you usually do first when solving a word problem?",a:["Identify the information and question", "Guess the answer", "Ignore the units", "Multiply everything"],cat:"School Skills"},{q:"What does a graph help you do?",a:["Display data visually", "Cook food", "Measure temperature directly", "Write a story"],cat:"School Skills"},{q:"What is a primary source in history?",a:["Evidence from the time being studied", "A modern summary only", "A fictional story", "A textbook index"],cat:"School Skills"},{q:"What is a hypothesis?",a:["A testable explanation or prediction", "A final proven fact", "A measurement tool", "A map"],cat:"School Skills"},{q:"What does an atlas contain?",a:["Maps", "Recipes", "Songs", "Equations only"],cat:"School Skills"},{q:"What is a bibliography?",a:["A list of sources used", "A list of questions", "A type of graph", "A maths formula"],cat:"School Skills"},{q:"What is plagiarism?",a:["Using someone else's work without proper credit", "Writing your own idea", "Checking spelling", "Doing research"],cat:"School Skills"},{q:"What does a scale on a map show?",a:["The relationship between map distance and real distance", "The weather", "Population only", "Compass direction only"],cat:"School Skills"},{q:"What is a variable in an experiment?",a:["A factor that can change", "A conclusion", "A book", "A graph title"],cat:"School Skills"}]},
+{title:"Guess the Flag",popular:true,questions:makeFlagQuestions()}
+];
+const blox=[
+ ["Cat","🐱","Common"],["Dog","🐶","Common"],["Sheep","🐑","Common"],["Pig","🐷","Common"],["Cow","🐮","Common"],["Lama","🦙","Common"],["Hamster","🐹","Common"],["Frog","🐸","Common"],["Bunny","🐰","Common"],
+ ["Parrot","🦜","Uncommon"],["Bat","🦇","Uncommon"],["Panda","🐼","Uncommon"],["Bear","🐻","Uncommon"],["Owl","🦉","Uncommon"],["Duck","🦆","Uncommon"],["Lizard","🦎","Uncommon"],
+ ["Tiger","🐯","Rare"],["Rhino","🦏","Rare"],["Leopard","🐆","Rare"],["Cheetah","🐆","Rare"],["Butterfly","🦋","Rare"],["Peacock","🦚","Rare"],["Zebra","🦓","Rare"],["Sloth","🦥","Rare"],["Elephant","🐘","Rare"],
+ ["Racoon","🦝","Epic"],["Flamingo","🦩","Epic"],["Hedgehog","🦔","Epic"],["Bee","🐝","Epic"],["Ladybug","🐞","Epic"],["Squirrel","🐿️","Epic"],
+ ["Pray Mantis","🦗","Legendary"],["Wasp","🐝","Legendary"],["Eagle","🦅","Legendary"]
+];
+const boxData=[
+ {name:"Animal Pack",icon:"🐾",cost:20,weights:{Common:40,Uncommon:30,Rare:20,Epic:9,Legendary:1,Chroma:0},items:blox.map(x=>({name:x[0],icon:x[1],rarity:x[2]}))},
+ {name:"Fruit Pack",icon:"🍉",cost:50,weights:{Common:40,Uncommon:30,Rare:15,Epic:10,Legendary:4.6,Mythic:0.4},items:[
+  {name:"Apple",icon:"🍎",rarity:"Common"},{name:"Toxic Melon",icon:"🍈",rarity:"Exotic",hidden:true,hiddenChance:0.05},{name:"Pear",icon:"🍐",rarity:"Common"},{name:"Banana",icon:"🍌",rarity:"Common"},
+  {name:"Kiwi",icon:"🥝",rarity:"Uncommon"},{name:"Pineapple",icon:"🍍",rarity:"Uncommon"},{name:"Green Apple",icon:"🍏",rarity:"Uncommon"},
+  {name:"Peach",icon:"🍑",rarity:"Rare"},{name:"Cherry",icon:"🍒",rarity:"Rare"},{name:"Strawberry",icon:"🍓",rarity:"Rare"},
+  {name:"Mango",icon:"🥭",rarity:"Epic"},{name:"Lemon",icon:"🍋",rarity:"Epic"},{name:"Dragon Fruit",icon:"🐉",rarity:"Epic"},
+  {name:"Watermelon",icon:"🍉",rarity:"Legendary"},{name:"Avocado",icon:"🥑",rarity:"Legendary"},
+  {name:"Star Fruit",icon:"⭐",rarity:"Mythic"}
+ ]},
+ {name:"Sport Pack",icon:"🏆",cost:35,weights:{Common:40,Uncommon:30,Rare:15,Epic:10,Legendary:4.7,Mythic:0.3},items:[
+  {name:"Soccer Ball",icon:"⚽",rarity:"Common"},{name:"Skydiver",icon:"🪂",rarity:"Exotic",hidden:true,hiddenChance:0.06},{name:"Basketball",icon:"🏀",rarity:"Common"},{name:"Tennis Ball",icon:"🎾",rarity:"Common"},
+  {name:"Netball",icon:"🏐",rarity:"Uncommon"},{name:"Rugby Ball",icon:"🏉",rarity:"Uncommon"},{name:"NFL Ball",icon:"🏈",rarity:"Uncommon"},
+  {name:"Cricket Bat",icon:"🏏",rarity:"Rare"},{name:"Ice Skate",icon:"⛸️",rarity:"Rare"},{name:"Bike",icon:"🚲",rarity:"Rare"},
+  {name:"Karate Belt",icon:"🥋",rarity:"Epic"},{name:"Boxing Gloves",icon:"🥊",rarity:"Epic"},{name:"Swim Suit",icon:"🩱",rarity:"Epic"},
+  {name:"Chess Piece",icon:"♟️",rarity:"Legendary"},{name:"Hockey Stick",icon:"🏒",rarity:"Legendary"},
+  {name:"1st Place Medal",icon:"🥇",rarity:"Mythic"}
+ ]},
+ {name:"Aquatic Pack",icon:"🌊",cost:100,weights:{Common:40,Uncommon:30,Rare:15,Epic:12.4,Legendary:2.5,Mythic:0.1},items:[
+  {name:"Fish",icon:"🐟",rarity:"Common"},{name:"Clown Fish",icon:"🐠",rarity:"Common"},{name:"Sea Shell",icon:"🐚",rarity:"Common"},
+  {name:"Shrimp",icon:"🦐",rarity:"Uncommon"},{name:"Lobster",icon:"🦞",rarity:"Uncommon"},{name:"Crab",icon:"🦀",rarity:"Uncommon"},
+  {name:"Pufferfish",icon:"🐡",rarity:"Rare"},{name:"Squid",icon:"🦑",rarity:"Rare"},{name:"Otter",icon:"🦦",rarity:"Rare"},
+  {name:"Dolphin",icon:"🐬",rarity:"Epic"},{name:"Whale",icon:"🐋",rarity:"Epic"},{name:"Seasnake",icon:"🐍",rarity:"Epic"},
+  {name:"Shark",icon:"🦈",rarity:"Legendary"},
+  {name:"Kraken",icon:"🐙",rarity:"Mythic"}
+ ]},
+ {name:"Fantasy Pack",icon:"🦄",cost:75,weights:{Common:40,Uncommon:30,Rare:15,Epic:12.5,Legendary:2.3,Mythic:0.2},items:[
+  {name:"Angel",icon:"👼",rarity:"Common"},{name:"Galaxy",icon:"🌌",rarity:"Exotic",hidden:true,hiddenChance:0.03},{name:"Fairy",icon:"🧚",rarity:"Common"},
+  {name:"Mermaid",icon:"🧜",rarity:"Uncommon"},{name:"Vampire",icon:"🧛",rarity:"Uncommon"},
+  {name:"Wizard",icon:"🧙",rarity:"Rare"},{name:"Superhero",icon:"🦸",rarity:"Rare"},
+  {name:"Vampire",icon:"🧛‍♂️",rarity:"Epic"},{name:"Zombie",icon:"🧟",rarity:"Epic"},
+  {name:"Unicorn",icon:"🦄",rarity:"Legendary"},{name:"Genie",icon:"🧞",rarity:"Legendary"},
+  {name:"Infinity ♾",icon:"♾️",rarity:"Mythic"}
+ ]},
+ {name:"Music Pack",icon:"🎵",cost:100,weights:{Common:40,Uncommon:30,Rare:15,Epic:10,Legendary:4.7,Mythic:0.3},items:[
+  {name:"Music Note",icon:"🎶",rarity:"Common"},{name:"Headphones",icon:"🎧",rarity:"Common"},
+  {name:"Guitar",icon:"🎸",rarity:"Uncommon"},{name:"Drums",icon:"🥁",rarity:"Uncommon"},
+  {name:"Microphone",icon:"🎙️",rarity:"Rare"},{name:"Violin",icon:"🎻",rarity:"Rare"},
+  {name:"Piano",icon:"🎹",rarity:"Epic"},{name:"Saxophone",icon:"🎷",rarity:"Epic"},
+  {name:"Trumpet",icon:"🎺",rarity:"Legendary"},{name:"Treble Clef",icon:"🎼",rarity:"Mythic"}
+ ]},
+ {name:"Jolly Pack",icon:"🎄",cost:100,weights:{Common:42.25,Uncommon:30,Rare:15,Epic:10,Legendary:2.5,Mythic:0.25},items:[
+  {name:"Milk",icon:"🥛",rarity:"Common"},{name:"Cookie",icon:"🍪",rarity:"Common"},
+  {name:"Snowflake",icon:"❄️",rarity:"Uncommon"},{name:"Workshop",icon:"⛪",rarity:"Uncommon"},
+  {name:"Reindeer",icon:"🦌",rarity:"Rare"},{name:"Elf",icon:"🧝‍♂️",rarity:"Rare"},
+  {name:"Chocolate",icon:"🍫",rarity:"Epic"},{name:"Jolly Tree",icon:"🎄",rarity:"Epic"},
+  {name:"Mrs Claus",icon:"🤶",rarity:"Legendary"},
+  {name:"Santa Claus",icon:"🎅",rarity:"Mythic"}
+ ]}
+];
+// Add all Fruit and Sport pack items to the My Blox catalog.
+for(const pack of boxData){
+  if(pack.name === "Animal Pack") continue;
+  for(const item of pack.items){
+    if(!blox.some(x=>x[0]===item.name)) blox.push([item.name,item.icon,item.rarity]);
+  }
+}
+const adminOptions=document.getElementById("adminCommandOptions");if(adminOptions){adminOptions.innerHTML=boxData.flatMap(p=>p.items).map(x=>`<option value="/giveblox ${x.name}"></option>`).join("")}
+// Make every question set safe to play, including older saved sets.
+function normaliseQuestionSet(set){
+ if(!set||typeof set!=="object") return null;
+ const questions=Array.isArray(set.questions)?set.questions.filter(q=>q&&typeof q.q==="string"&&q.q.trim()&&Array.isArray(q.a)&&q.a.length>=2).map(q=>({...q,a:q.a.map(String)})):[];
+ return {...set,title:String(set.title||"Untitled Set"),questions};
+}
+defaultSets=defaultSets.map(normaliseQuestionSet).filter(Boolean);
+const builtinSetTitles=new Set(defaultSets.map(x=>x.title));
+const DEFAULT_STATE=()=>({tokens:100,blox:["Cat"],equipped:"Cat",username:"",nametags:[],equippedNametag:"normal",sets:[],last:{score:0,correct:0,total:0,tokens:0,rows:[]},lastPlayed:Date.now()});
+let saveSlots=[];let activeSlotIndex=-1;
+function loadSlotData(){try{saveSlots=JSON.parse(localStorage.getItem("quizbloxSaveSlots")||"[]")}catch(e){saveSlots=[]}if(!Array.isArray(saveSlots))saveSlots=[];if(!saveSlots.length){try{const old=JSON.parse(localStorage.getItem("quizbloxSave")||"null");if(old&&old.username){old.lastPlayed=old.lastPlayed||Date.now();saveSlots=[old];localStorage.setItem("quizbloxSaveSlots",JSON.stringify(saveSlots))}}catch(e){}}}
+loadSlotData();let state=DEFAULT_STATE();
+function sanitiseState(s){s={...DEFAULT_STATE(),...(s||{})};s.nametags=Array.isArray(s.nametags)?s.nametags.filter(n=>["dot","yinyang","fantasy"].includes(n)):[];if(!s.equippedNametag||(!["normal","dot","yinyang","fantasy"].includes(s.equippedNametag))||(s.equippedNametag!=="normal"&&!s.nametags.includes(s.equippedNametag)))s.equippedNametag="normal";const validBloxNames=new Set([...blox.map(b=>b[0]),...boxData.flatMap(p=>p.items.map(x=>x.name))]);s.blox=Array.isArray(s.blox)?s.blox.filter(n=>validBloxNames.has(n)):[];if(!s.blox.length)s.blox=["Cat"];if(!s.equipped||!s.blox.includes(s.equipped))s.equipped=s.blox[0];
+// Discover sets are built-in only. Keep only genuinely user-created sets in the save.
+s.sets=Array.isArray(s.sets)?s.sets.map(normaliseQuestionSet).filter(x=>x&&x.title&&!builtinSetTitles.has(x.title)&&x.questions.length>0):[];s.lastPlayed=Number(s.lastPlayed)||Date.now();return s}
+state=sanitiseState(state);
+
+// Migrate older saved Blox names after pack updates.
+if(state.blox.includes("Panther")){state.blox=state.blox.filter(n=>n!=="Panther");if(!state.blox.includes("Rhino"))state.blox.push("Rhino");}
+if(state.blox.includes("Roller Skate")){state.blox=state.blox.filter(n=>n!=="Roller Skate");if(!state.blox.includes("Bike"))state.blox.push("Bike");}
+if(state.blox.includes("Blueberry")){state.blox=state.blox.filter(n=>n!=="Blueberry");if(!state.blox.includes("Peach"))state.blox.push("Peach");}
+if(state.blox.includes("Passionfruit")){state.blox=state.blox.filter(n=>n!=="Passionfruit");if(!state.blox.includes("Lemon"))state.blox.push("Lemon");}
+if(!state.blox.length) state.blox=["Cat"];
+if(!state.equipped || !state.blox.includes(state.equipped)) state.equipped=state.blox[0];
+let game={
+ set:null,mode:"Gold Wars",qi:0,correct:0,earned:0,gold:0,questionsAsked:0,
+ deadline:0,timer:null,locked:false,pendingSolo:false,pendingSet:0,pendingSetSource:"my",pendingMinutes:5,playType:"online",durationMs:0,_lastQ:null,chestRewards:[],adminLuck:null,xrayHunt:false,
+ bots:[],botTimer:null,botTimers:[],botStealTimer:null,countdownActive:false,rankings:[],stealActive:false,stealTimer:null,botCount:5,chestActive:false,chestRenderId:0,phase:"idle",chestTimeout:null,lureUpgraded:false,lureLevel:0,crazyReward:null,crazyRewardTimeout:null,crazyClickLock:false,hackerPassword:"",hackerGate:false,hackerTarget:null,hackerChoiceTimer:null,hackerChoiceEnd:0,hackerHoverIndex:null
+};
+function save(){if(activeSlotIndex<0)return;state.lastPlayed=Date.now();saveSlots[activeSlotIndex]=JSON.parse(JSON.stringify(state));localStorage.setItem("quizbloxSaveSlots",JSON.stringify(saveSlots));localStorage.setItem("quizbloxSave",JSON.stringify(state));updateTop()}
+function updateTop(){document.getElementById("tokenTop").textContent=state.tokens;document.getElementById("usernameTop").textContent=state.username||"Guest"}
+function closeStartup(){document.getElementById("startupGate").classList.add("hidden");updateTop();renderSets();renderCollection();renderResults()}
+function showStartupHome(){document.getElementById("startupContent").innerHTML=`<div class="center"><h1 class="title">🎮 Welcome to QuizBlox</h1><p class="startupSub">Before you enter the lobby, choose whether you want to start a new game or load an existing save slot.</p></div><div class="startupActions"><button class="startupBtn" onclick="showNewGameForm()"><h2>🆕 New Game</h2><p class="startupSub">Create a fresh save slot and choose your username.</p></button><button class="startupBtn" onclick="showSaveSlots()"><h2>💾 Load Save</h2><p class="startupSub">Choose from your saved slots, including username, Bloxcoins and last played time.</p></button></div>`}
+function showNewGameForm(){document.getElementById("startupContent").innerHTML=`<div class="center"><h1 class="title">🆕 New Game</h1><p class="startupSub">Enter a username. A new save slot will be created automatically.</p></div><div class="newGameForm"><input id="newGameUsername" maxlength="18" placeholder="Enter your username"><div class="center"><button class="primary" onclick="createNewGame()">Create Save & Enter Lobby</button><button class="muted" onclick="showStartupHome()">Back</button></div></div>`;setTimeout(()=>document.getElementById("newGameUsername")?.focus(),0)}
+function formatLastPlayed(ts){const d=new Date(ts);return isNaN(d)?"Unknown":d.toLocaleString()}
+function esc(t){return String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]))}
+function showSaveSlots(){const cards=saveSlots.map((slot,i)=>`<div class="saveCard"><div class="saveCardMain"><div class="saveCardName">${esc(slot.username||"Unnamed")}</div><div class="saveMeta"><img class="coinIcon small" src="quizblox-coin.png" alt="Bloxcoin"> ${Number(slot.tokens)||0} Bloxcoins &nbsp; • &nbsp; Last played: ${formatLastPlayed(slot.lastPlayed)}</div></div><div class="saveCardActions"><button class="primary" onclick="loadSaveSlot(${i})">Load Slot ${i+1}</button><button class="danger" onclick="deleteSaveSlot(${i})">Delete</button></div></div>`).join("");document.getElementById("startupContent").innerHTML=`<div class="center"><h1 class="title">💾 Load Save</h1><p class="startupSub">Scroll down to see all your save slots.</p></div><div class="saveList">${cards||`<div class="card center"><h3>No save slots yet.</h3><p class="small">Create a New Game first.</p></div>`}</div><div class="center" style="margin-top:16px"><button class="muted" onclick="showStartupHome()">Back</button></div>`}
+function deleteSaveSlot(i){if(!saveSlots[i])return;const name=saveSlots[i].username||`Save Slot ${i+1}`;if(!confirm(`Delete ${name}? This cannot be undone.`))return;saveSlots.splice(i,1);localStorage.setItem("quizbloxSaveSlots",JSON.stringify(saveSlots));if(activeSlotIndex===i){activeSlotIndex=-1;state=DEFAULT_STATE();localStorage.removeItem("quizbloxSave");}else if(activeSlotIndex>i){activeSlotIndex--;}showSaveSlots();toast("Save deleted");}
+function createNewGame(){const name=document.getElementById("newGameUsername")?.value.trim();if(!name)return alert("Enter a username first.");let idx=saveSlots.findIndex(s=>!s||!s.username);if(idx<0)idx=saveSlots.length;if(idx>=20)return alert("All 20 save slots are full. Load a slot instead.");state=sanitiseState({...DEFAULT_STATE(),username:name,lastPlayed:Date.now()});activeSlotIndex=idx;save();closeStartup();show("home")}
+function loadSaveSlot(i){if(!saveSlots[i])return alert("That save slot is empty.");activeSlotIndex=i;state=sanitiseState(JSON.parse(JSON.stringify(saveSlots[i])));save();closeStartup();show("home")}
+function syncTransientUI(id){
+ const inGame=id==="play"||id==="chests";
+ const gold=document.getElementById("treasureGoldDisplay"); if(gold){gold.style.display=(inGame&&game.mode!=="Study")?"block":"none";gold.classList.toggle("crazyLbs",inGame&&game.mode==="Crazy Casting");gold.classList.toggle("hackerCryptoMode",inGame&&game.mode==="Heated Hackers");}
+ const lead=document.getElementById("gameLeaderboard"); if(lead)lead.style.display=inGame?"block":"none";
+ const tc=document.getElementById("topCollection"); if(tc)tc.style.display=inGame?"none":"block";
+ const te=document.getElementById("topExit"); if(te)te.style.display=inGame?"block":"none";
+ const steal=document.getElementById("stealOverlay"); if(steal && !(inGame&&game.stealActive)){steal.classList.remove("open");steal.setAttribute("aria-hidden","true");const cash=document.getElementById("stealCash");if(cash)cash.style.display="none"}
+}
+function show(id){document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));const v=document.getElementById(id);if(!v)return;v.classList.add("active");if(id==="market")renderMarket();if(id==="collection")renderCollection();if(id==="sets")renderSets();if(id==="discover")renderDiscover();if(id==="host"){renderHostSetChoice();renderPlayTypeUI();}if(id==="results")renderResults();if(id==="setup"){renderSetupBlooks();const n=document.getElementById("setupName");if(n)n.value=state.username||"";}if(id==="home")updateTop();syncTransientUI(id);scrollTo(0,0)}
+function exitGame(){
+ if(!game.pendingSolo && !game.set)return show("home");
+ if(game.playType!=="solo"){
+   const ok=confirm("Are you sure? You won't get your tokens.");
+   if(!ok)return;
+ }
+ const wasSolo=game.playType==="solo";
+ const tokensToKeep=Math.max(0,Number(game.earned)||0);
+ clearInterval(game.timer);clearInterval(game.botTimer);game.botTimers.forEach(clearTimeout);game.botTimers=[];clearInterval(game.botStealTimer);game.botStealTimer=null;clearTimeout(game.stealTimer);clearInterval(game.stealMoveTimer);clearInterval(game.stealCountdownTimer);clearTimeout(game.swapTimer);clearTimeout(game.cryptoRewardTimer);document.getElementById("swapOverlay")?.classList.remove("open");document.getElementById("cryptoRewardOverlay")?.classList.remove("open");game.stealMoveTimer=null;game.stealCountdownTimer=null;clearTimeout(game.chestTimeout);game.chestTimeout=null;clearTimeout(game.hackerChoiceTimer);game.hackerChoiceTimer=null;clearTimeout(game.hackerResultTimer);game.hackerResultTimer=null;game.hackerHoverIndex=null;clearTimeout(game.crazyRewardTimeout);game.crazyRewardTimeout=null;game.timer=null;game.botTimer=null;game.stealTimer=null;game._finished=true;game.locked=true;game.phase="finished";game.stealActive=false;game.chestActive=false;game.chestRewards=[];document.getElementById("countdown").classList.remove("open");document.getElementById("wrongCountdown").classList.remove("open");document.getElementById("stealOverlay")?.classList.remove("open");
+ if(wasSolo&&tokensToKeep>0){state.tokens+=tokensToKeep;save();}
+ game.pendingSolo=false;game.playType="online";show("home");toast(wasSolo?`Game exited — +${tokensToKeep} tokens earned!`:"Game exited")
+}
+
+function toast(t){let x=document.getElementById("toast");x.textContent=t;x.style.display="block";setTimeout(()=>x.style.display="none",1800)}
+function choosePlayType(type){game.playType=type==="solo"?"solo":"online";game.pendingSolo=true;show("host");renderPlayTypeUI();}
+function renderPlayTypeUI(){
+ const solo=game.playType==="solo";
+ const title=document.getElementById("hostTitle");if(title)title.textContent=solo?"Play Solo":"Play Online";
+ const bots=document.getElementById("botSetup");if(bots)bots.style.display=solo?"none":"block";
+ const mode=document.getElementById("hostMode");
+ if(mode){
+   const current=mode.value;
+   mode.innerHTML=solo
+     ? '<option value="Crazy Casting">Crazy Casting</option><option value="Study">Study</option>'
+     : '<option value="Gold Wars">Gold Wars</option><option value="Crazy Casting">Crazy Casting</option><option value="Heated Hackers">Heated Hackers</option>';
+   if([...mode.options].some(o=>o.value===current)) mode.value=current; else mode.value=solo?"Crazy Casting":"Gold Wars";
+ }
+ const btn=document.getElementById("startGameBtn");if(btn)btn.textContent=solo?"▶ Start Solo Game":"▶ Start Online Game";
+}
+function renderSetupBlooks(){
+ const nameEl=document.getElementById("setupName");if(nameEl && document.activeElement!==nameEl && !nameEl.value) nameEl.value="";
+ const normal=blox.filter(x=>state.blox.includes(x[0])).map(x=>({name:x[0],icon:x[1],rarity:x[2]}));
+ const hidden=boxData.flatMap(p=>p.items.filter(x=>x.hidden&&state.blox.includes(x.name))).map(x=>({name:x.name,icon:x.icon,rarity:x.rarity}));
+ const all=[...normal,...hidden];
+ document.getElementById("setupBlooks").innerHTML=all.map(x=>`<button class="blook ${state.equipped===x.name?"selected":""}" style="border-color:${state.equipped===x.name?"#65d6ff":"#374477"}" onclick="selectSetupBlook('${x.name.replace(/'/g,"\'")}')"><span class="avatar">${x.icon}</span><b>${x.name}</b><div class="rarity ${x.rarity.toLowerCase()}">${x.rarity}</div></button>`).join("");
+}
+function selectSetupBlook(n){const nameEl=document.getElementById("setupName");const currentName=nameEl?nameEl.value:"";state.equipped=n;renderSetupBlooks();if(nameEl){nameEl.value=currentName;nameEl.focus();nameEl.setSelectionRange(nameEl.value.length,nameEl.value.length)}}
+function confirmSetup(){
+ let n=document.getElementById("setupName").value.trim();
+ if(!n)return toast("Enter a name first");
+ if(!state.equipped)return toast("Choose a Blox first");
+ state.username=n;save();
+ if(game.pendingSolo){launchAfterSetup();}else show("home");
+}
+function launchAfterSetup(){
+  const mins=Number(game.pendingMinutes);
+  const chosen=getSelectedSet();
+  if(!Number.isFinite(mins)||mins<1){show("host");return toast("Enter at least 1 minute");}
+  if(!chosen||!Array.isArray(chosen.questions)||chosen.questions.length===0){show("host");renderHostSetChoice();return toast("That set could not be loaded. Please select it again.");}
+  game.pendingSolo=false;
+  game.set=normaliseQuestionSet(chosen);
+  if(!game.set||!game.set.questions.length){game.pendingSolo=true;show("host");return toast("That set has no playable questions.");}
+  game.mode=document.getElementById("hostMode")?.value || "Gold Wars";
+  prepareGame(mins);
+}
+function getSelectedSet(){
+ const source=game.pendingSetSource==="discover"?"discover":"my";
+ const idx=Math.max(0,Number(game.pendingSet)||0);
+ const list=source==="discover"?defaultSets:state.sets;
+ const chosen=list[idx]||null;
+ if(!chosen||!Array.isArray(chosen.questions))return null;
+ const playable=normaliseQuestionSet(chosen);
+ return playable&&playable.questions.length?playable:null;
+}
+function renderHostSetChoice(){
+ const chosen=getSelectedSet();
+ const el=document.getElementById("selectedSetCard");
+ if(el)el.innerHTML=chosen?`📚 <span>${esc(chosen.title)}</span> <span class="small">(${chosen.questions.length} questions)</span>`:`No set selected — choose one below or use 🌎 Discover Sets`;
+ const mine=document.getElementById("hostMySets");
+ if(mine)mine.innerHTML=state.sets.length?`<p class="small"><b>My Sets</b></p><div style="display:grid;gap:8px">${state.sets.map((x,i)=>`<button class="discoverBtn" onclick="selectMySet(${i})">${game.pendingSetSource==="my"&&Number(game.pendingSet)===i?"✅ ":""}${esc(x.title)} <span class="small">(${x.questions.length})</span></button>`).join("")}</div>`:`<div class="card" style="margin:10px 0"><p class="small">You don't have any handmade sets yet. Use Discover to choose a built-in set.</p></div>`;
+}
+function selectMySet(i){if(!state.sets[i])return;game.pendingSet=i;game.pendingSetSource="my";renderHostSetChoice();toast(`${state.sets[i].title} selected!`)}
+function renderSets(){
+ const el=document.getElementById("setGrid");if(!el)return;
+ el.innerHTML=state.sets.length?state.sets.map((x,i)=>`<div class="card"><h3>📚 ${esc(x.title)}</h3><p>${x.questions.length} questions</p><button class="primary" onclick="quickPlay(${i})">Play Solo</button></div>`).join(""):`<div class="card"><h3>No saved sets yet</h3><p class="small">Built-in sets are all in Discover.</p><button class="discoverBtn" onclick="show('discover')">🌎 Discover Sets</button></div>`;
+}
+function startSoloGame(){
+ let source=game.pendingSetSource==="discover"?"discover":"my";
+ const list=source==="discover"?defaultSets:state.sets;
+ let i=Number(game.pendingSet);
+ if(!Number.isInteger(i)||i<0||i>=list.length){
+   i=0;
+   game.pendingSet=0;
+ }
+ const chosen=list[i];
+ if(!chosen||!Array.isArray(chosen.questions)||chosen.questions.length===0){
+   return toast(source==="discover"?"That Discover set could not be loaded. Please select it again.":"Choose a set with questions first.");
+ }
+ let mins=Number(document.getElementById("playMinutes").value);
+ if(!Number.isFinite(mins)||mins<1)return toast("Enter at least 1 minute");
+ game.pendingSolo=true;
+ game.pendingSet=i;
+ game.pendingSetSource=source;
+ game.pendingMinutes=mins;
+ show("setup");
+}
+function quickPlay(i){game.pendingSolo=true;game.pendingSet=i;game.pendingSetSource="my";game.pendingMinutes=5;show("host")}
+function renderDiscover(){
+ const list=document.getElementById("discoverList"),detail=document.getElementById("discoverDetail");if(!list||!detail)return;
+ detail.style.display="none";list.style.display="grid";
+ const popular=defaultSets.map((x,i)=>i).filter(i=>defaultSets[i].popular);
+ const rest=defaultSets.map((x,i)=>i).filter(i=>!defaultSets[i].popular).sort(()=>Math.random()-.5);
+ const order=[...popular,...rest];
+ list.innerHTML=order.map(i=>{const x=defaultSets[i];return `<div class="card discoverCard" onclick="openDiscoverSet(${i})"><h2 class="${x.popular?"popularSet":""}">${x.popular?"⭐ ":""}${esc(x.title)}</h2><p>${x.questions.length} questions</p><p class="small">Tap to preview</p></div>`}).join("");
+}
+function openDiscoverSet(i){
+ const set=defaultSets[i];if(!set)return;const list=document.getElementById("discoverList"),detail=document.getElementById("discoverDetail");list.style.display="none";detail.style.display="block";
+ detail.innerHTML=`<button class="back muted" onclick="renderDiscover()">← Back to Discover</button><div class="card"><h1 class="${set.popular?"popularSet":""}">${set.popular?"⭐ ":""}${esc(set.title)}</h1><p class="small">${set.questions.length} questions • Chooseable answers are shown, but the correct answer is hidden.</p>${set.questions.slice(0,100).map(q=>`<div class="discoverQuestion">${q.flagImage?`<img class="discoverFlagImage" src="${q.flagImage}" alt="Flag question image">`:""}<b>${esc(q.q)}</b>${Array.isArray(q.a)?`<div class="discoverAnswers">${q.a.map((a,ai)=>`<button type="button" class="discoverAnswer" onclick="event.stopPropagation();return false;">${esc(a)}</button>`).join("")}</div>`:""}</div>`).join("")}<button class="primary" onclick="selectDiscoverSet(${i})">✅ Select This Set</button></div>`;scrollTo(0,0);
+}
+function selectDiscoverSet(i){const set=defaultSets[i];if(!set||!Array.isArray(set.questions)||!set.questions.length)return toast("This Discover set has no playable questions.");game.pendingSet=i;game.pendingSetSource="discover";renderHostSetChoice();show("host");toast(`${set.title} selected!`)}
+function prepareGame(mins){
+ if(!game.set||!game.set.questions.length)return toast("This question set has no questions");
+ clearInterval(game.timer);clearInterval(game.botTimer);game.botTimers.forEach(clearTimeout);game.botTimers=[];clearInterval(game.botStealTimer);game.botStealTimer=null;
+ clearTimeout(game.chestTimeout);game.chestTimeout=null;game.qi=0;game.correct=0;game.earned=0;game.gold=0;game.questionsAsked=0;game.roundId=0;game.locked=true;game.chestRewards=[];game.chestActive=false;game.phase="countdown";game.rankings=[];
+ game.durationMs=mins*60*1000;game._lastQ=null;game._finished=false;game.stealActive=false;game.lureUpgraded=false;game.lureLevel=0;game.crazyReward=null;game.crazyClickLock=false;document.getElementById("stealOverlay")?.classList.remove("open");document.getElementById("stealOverlay")?.setAttribute("aria-hidden","true");document.getElementById("stealCash")?.style.setProperty("display","none");clearTimeout(game.stealTimer);game.stealTimer=null;clearTimeout(game.hackerChoiceTimer);game.hackerChoiceTimer=null;game.hackerHoverIndex=null;clearTimeout(game.crazyRewardTimeout);game.crazyRewardTimeout=null;game.botTimers.forEach(clearTimeout);game.botTimers=[];clearInterval(game.botStealTimer);game.botStealTimer=null;
+ game.botCount=game.playType==="solo"?0:Math.max(4,Math.min(20,Number(document.getElementById("botCount")?.value)||5));
+ createBots();renderLeaderboard();show("play");
+ runCountdown(()=>beginGame(mins));
+}
+function runCountdown(done){
+ let overlay=document.getElementById("countdown"),num=document.getElementById("countdownNum"),vals=["3","2","1","GO!"];let i=0;
+ overlay.classList.add("open");game.countdownActive=true;
+ function tick(){num.className="countdownNum"+(vals[i]==="GO!"?" countdownGo":"");num.textContent=vals[i];void num.offsetWidth;num.style.animation="none";void num.offsetWidth;num.style.animation="countPop .8s ease both";
+   if(vals[i]==="GO!"){setTimeout(()=>{overlay.classList.remove("open");game.countdownActive=false;done()},650);return}
+   i++;setTimeout(tick,800);
+ }
+ tick();
+}
+function randomHackerPassword(){const words=["Shadow","Rocket","Pizza","Tiger","Galaxy","Blox","Dragon","Secret","Thunder","Cookie","Wizard","Pixel","Banana","Storm","Comet","Ninja"];return words[Math.floor(Math.random()*words.length)]+(Math.floor(10+Math.random()*90));}
+function createBots(){
+ const names=["PixelPro","QuizKid","BloxMaster","Speedy","Nova","LuckyBlox","BrainBox","Ace","Rocket","StarPlayer","Frosty","Tiger","Mango","Shadow","Spark","Turbo"];
+ const icons=blox.map(x=>x[1]);
+ game.bots=[];game.botTimers=[];let count=Number(game.botCount)||0;
+ let shuffled=[...names].sort(()=>Math.random()-.5);
+ for(let i=0;i<count;i++) game.bots.push({name:shuffled[i],icon:icons[Math.floor(Math.random()*icons.length)],gold:Math.floor(Math.random()*11),tokens:0,lureUpgraded:false,lureLevel:0,correctRate:.70+Math.random()*.10,nametag:randomBotNametag(),password:randomHackerPassword()});
+}
+function scheduleBot(bot){
+ if(game._finished)return;
+ const delay=5000+Math.random()*3000;
+ const timer=setTimeout(()=>{
+   if(game._finished)return;
+   if(game.mode==="Heated Hackers"){
+     if(Math.random()>=.20){const reward=hackerBotReward();if(reward.type==="mult")bot.gold=Math.floor(bot.gold*reward.value);else bot.gold+=reward.value;}
+     renderLeaderboard();scheduleBot(bot);return;
+   }
+   const wrong=Math.random()<(.20+Math.random()*.10);
+   if(wrong){renderLeaderboard();const wrongTimer=setTimeout(()=>{if(!game._finished)scheduleBot(bot)},3000);game.botTimers.push(wrongTimer);return;}
+   if(Math.random()<.15){botSteal(bot);}else bot.gold+=treasureBotGold();
+   renderLeaderboard();scheduleBot(bot);
+ },delay);
+ game.botTimers.push(timer);
+}
+function hackerBotReward(){let r=Math.random()*100;if(r<25)return{type:"add",value:10};if(r<40)return{type:"add",value:25};if(r<50)return{type:"add",value:50};if(r<57)return{type:"mult",value:2};if(r<60)return{type:"mult",value:3};return{type:"hack",value:0};}
+
+function startBots(){
+ game.botTimers.forEach(clearTimeout);game.botTimers=[];clearInterval(game.botStealTimer);game.botStealTimer=null;
+ if(game._finished)return;
+ if(game.mode==="Crazy Casting"){game.bots.forEach(scheduleCrazyBot);return;}
+ game.bots.forEach(scheduleBot);
+}
+function scheduleCrazyBot(bot){
+ if(game._finished||game.mode!=="Crazy Casting")return;
+ const delay=5000+Math.random()*3000;
+ const timer=setTimeout(()=>{
+   if(game._finished||game.mode!=="Crazy Casting")return;
+   if(Math.random()>=.20){
+     const reward=crazyBotReward(bot.lureLevel||0);
+     bot.gold+=reward.lbs;
+     if((bot.lureLevel||0)<8 && Math.random()<.10){bot.lureLevel=(bot.lureLevel||0)+1;bot.lureUpgraded=bot.lureLevel>0;}
+     renderLeaderboard();
+   }
+   scheduleCrazyBot(bot);
+ },delay);
+ game.botTimers.push(timer);
+}
+function crazyBotReward(level){
+ const pools=[
+  {r:"Trash",min:10,max:50,items:[["Old boot 🥾","🥾"],["Trash Bags 🛍","🛍"],["Stinky socks 🧦","🧦"],["Paper 📄","📄"]]},
+  {r:"Common",min:100,max:500,items:[["Cat 🐱","🐱"],["Fish 🐟","🐟"],["Scissors ✂️","✂️"],["Dirty ball ⚽","⚽"]]},
+  {r:"Uncommon",min:1000,max:5000,items:[["Wool 🧶","🧶"],["Gloves 🧤","🧤"],["Tennis ball ⚾","⚾"],["Stuffed toy 🧸","🧸"]]},
+  {r:"Rare",min:5000,max:20000,items:[["Clown fish 🐠","🐠"],["Salt fish 🐟","🐟"],["Shrimp 🦐","🦐"],["Crab 🦀","🦀"],["Shell 🐚","🐚"],["Lobster 🦞","🦞"]]},
+  {r:"Epic",min:25000,max:75000,items:[["Dolphin 🐬","🐬"],["Pufferfish 🐡","🐡"],["Squid 🦑","🦑"],["Otter 🦦","🦦"]]},
+  {r:"Legendary",min:100000,max:500000,items:[["Shark 🦈","🦈"],["Whale 🐋","🐋"],["Octopus 🐙","🐙"],["Seasnake 🐍","🐍"]]},
+  {r:"Mythic",min:1000000,max:5000000,items:[["Unicorn 🦄","🦄"],["Alien 👽","👽"],["Aeroplane ✈️","✈️"],["Bag of money 💰","💰"]]},
+  {r:"Exotic",min:10000000,max:50000000,items:[["Star 🎇","🎇"],["Godly Sandwich 🥪","🥪"],["Lost King 🤴","🤴"]]},
+  {r:"Celestial",min:100000000,max:1000000000,items:[["Supernova 🌌","🌌"],["Meteor ☄️","☄️"],["Space craft 🛰️","🛰️"]]}
+ ];
+ level=Math.max(0,Math.min(8,Number(level)||0));
+ const low=level, high=level+1;
+ const chanceHigh=level>=7?.05:.20;
+ const picked=Math.random()<chanceHigh?pools[high]:pools[low];
+ const item=picked.items[Math.floor(Math.random()*picked.items.length)];
+ return {lbs:Math.floor(picked.min+Math.random()*(picked.max-picked.min+1)),rarity:picked.r};
+}
+function treasureBotGold(){let r=Math.random()*100;if(r<40)return 10;if(r<65)return 25;if(r<80)return 50;if(r<92)return 100;if(r<97)return 500;if(r<99)return 1000;return 2500}
+function nametagClass(tag){return tag==="dot"?"nametag-dot":tag==="yinyang"?"nametag-yinyang":tag==="fantasy"?"nametag-fantasy":"nametag-normal"}
+function nametagLabel(tag){return tag==="dot"?"Dot":tag==="yinyang"?"Ying Yang":tag==="fantasy"?"Fantasy":"Normal"}
+function renderTag(name,tag){return `<span class="nametag ${nametagClass(tag)}">${name}</span>`}
+function playerNametag(p){return p.me?(state.equippedNametag||"normal"):(p.nametag||"normal")}
+function randomBotNametag(){if(Math.random()<0.60)return "normal";let tags=["dot","yinyang","fantasy"];return tags[Math.floor(Math.random()*tags.length)]}
+
+function getBloxIcon(name){const base=blox.find(x=>x[0]===name);if(base)return base[1];const hidden=boxData.flatMap(p=>p.items).find(x=>x.hidden&&x.name===name);return hidden?.icon||"👤";}
+function renderLeaderboard(){
+ const el=document.getElementById("gameLeaderboardRows");if(!el)return;
+ let players=[{name:state.username||"You",icon:getBloxIcon(state.equipped),gold:game.gold,me:true,nametag:state.equippedNametag||"normal"},...game.bots.map(b=>({...b,me:false}))].sort((a,b)=>b.gold-a.gold);
+ document.getElementById("gameLeaderboardTitle").textContent=game.mode==="Gold Wars"?"🏆 Gold Leaderboard":game.mode==="Heated Hackers"?"🏆 Crypto Leaderboard":game.mode==="Study"?"📖 Study Progress":"🏆 LBS Leaderboard";
+ el.innerHTML=players.map((p,i)=>`<div class="gameLeadRow ${p.me?"me":""}"><span class="gameLeadRank">${i+1}</span><span class="gameLeadIcon">${p.icon}</span><span class="gameLeadName">${renderTag((p.name+(p.me?" (You)":"")),playerNametag(p))}</span><span class="gameLeadScore">${p.gold}</span></div>`).join("");
+}
+function beginGame(mins){
+ document.getElementById("playMode").textContent=game.mode;show("play");updateRunStats();renderLeaderboard();
+ if(game.mode==="Study"){ document.getElementById("gameLeaderboard").style.display="none"; document.getElementById("crazyCastingScene").style.display="none"; document.getElementById("hackerBoxArea").style.display="none"; document.getElementById("hackerPasswordGate").style.display="none"; document.getElementById("normalQuestionArea").style.display="block"; }
+ if(game.mode==="Heated Hackers"){
+   game.locked=true;game.phase="hackerPassword";game.hackerGate=true;game.hackerPassword="";game.deadline=0;
+   document.getElementById("normalQuestionArea").style.display="none";document.getElementById("crazyCastingScene").style.display="none";document.getElementById("hackerBoxArea").style.display="none";document.getElementById("hackerPasswordGate").style.display="block";
+   document.getElementById("hackerPasswordInput").value="";setTimeout(()=>document.getElementById("hackerPasswordInput")?.focus(),50);
+   return;
+ }
+ game.locked=false;game.phase=game.mode==="Crazy Casting"?"castingIdle":"question";game.deadline=Date.now()+game.durationMs;startBots();startGameTimer();if(game.mode==="Crazy Casting")renderCrazyCasting();else renderQuestion();
+}
+function submitHackerPassword(){
+ if(game.mode!=="Heated Hackers"||game.phase!=="hackerPassword")return;
+ const input=document.getElementById("hackerPasswordInput");const pw=(input?.value||"").trim();if(!pw)return toast("Enter a password first.");
+ game.hackerPassword=pw;game.hackerGate=false;game.locked=false;game.phase="question";game.deadline=Date.now()+game.durationMs;
+ document.getElementById("hackerPasswordGate").style.display="none";document.getElementById("normalQuestionArea").style.display="block";
+ startBots();startGameTimer();renderQuestion();toast("Password locked in! 🔐");
+}
+function formatTime(ms){let s=Math.max(0,Math.ceil(ms/1000)),m=Math.floor(s/60),r=s%60;return `${m}:${String(r).padStart(2,"0")}`}
+function startGameTimer(){
+ game.timer=setInterval(()=>{
+   let left=game.deadline-Date.now(),pct=Math.max(0,Math.min(100,left/game.durationMs*100));
+   document.getElementById("timeLeft").textContent=formatTime(left);
+   document.getElementById("chestTime").textContent=formatTime(left);
+   document.getElementById("timebar").style.width=pct+"%";
+   renderLeaderboard();
+   if(left<=0){clearInterval(game.timer);game.timer=null;game.locked=true;game.phase="finished";finishGame()}
+ },100);
+}
+function updateRunStats(){
+ document.getElementById("correctCount").textContent=game.correct;
+ document.getElementById("earnedNow").textContent=game.earned;
+ document.getElementById("goldNow").textContent=game.gold;
+ document.getElementById("bigGoldAmount").textContent=game.gold.toLocaleString();
+ const bigLab=document.getElementById("bigCurrencyLabel");if(bigLab)bigLab.textContent=game.mode==="Crazy Casting"?"🐟 LBS":game.mode==="Heated Hackers"?"© CRYPTO":game.mode==="Study"?"📖 STUDY":"💰 TREASURE GOLD";
+ const lab=document.getElementById("currencyLabel");if(lab)lab.textContent=game.mode==="Crazy Casting"?"LBS":game.mode==="Heated Hackers"?"Crypto":game.mode==="Study"?"Tokens":"Gold";
+ const ls=document.getElementById("lureStatus");if(ls){ls.style.display=game.mode==="Crazy Casting"&&game.lureLevel>0?"block":"none";if(game.mode==="Crazy Casting"&&game.lureLevel>0)ls.innerHTML=`🎣 Lure: <b>Level ${game.lureLevel}</b>`;}
+}
+function randomQuestion(){
+ let q=game.set.questions[Math.floor(Math.random()*game.set.questions.length)];
+ if(game.set.questions.length>1 && q===game._lastQ) return randomQuestion();
+ game._lastQ=q;return q;
+}
+function crazyCastClick(e){
+ if(game._finished||game.mode!=="Crazy Casting"||game.countdownActive||Date.now()>=game.deadline)return;
+ if(game.phase!=="castingIdle")return;
+ if(game.crazyClickLock)return;
+ game.crazyClickLock=true;
+ game.phase="question";game.locked=false;
+ renderCrazyQuestion();
+ setTimeout(()=>game.crazyClickLock=false,250);
+}
+function renderCrazyCasting(){
+ const scene=document.getElementById("crazyCastingScene"),normal=document.getElementById("normalQuestionArea");
+ if(!scene)return;
+ normal.style.display="none";scene.style.display="block";
+ const lure=game.lureLevel>0?`🧲 Lure Lv.${game.lureLevel}`:"🎣 Basic Lure";
+ scene.innerHTML=`<div class="crazyWater"></div><div class="crazyBridge"><div class="crazyRail"><i class="crazyPost a"></i><i class="crazyPost b"></i><i class="crazyPost c"></i></div></div><div class="crazyPlayer">${getBloxIcon(state.equipped)}</div><div class="crazyPrompt">Click anywhere to fish</div>`;
+}
+function crazyRewardRoll(){
+ const pools=[
+  {r:"Trash",min:10,max:50,items:[["Old boot 🥾","🥾"],["Trash Bags 🛍","🛍"],["Stinky socks 🧦","🧦"],["Paper 📄","📄"]]},
+  {r:"Common",min:100,max:500,items:[["Cat 🐱","🐱"],["Fish 🐟","🐟"],["Scissors ✂️","✂️"],["Dirty ball ⚽","⚽"]]},
+  {r:"Uncommon",min:1000,max:5000,items:[["Wool 🧶","🧶"],["Gloves 🧤","🧤"],["Tennis ball ⚾","⚾"],["Stuffed toy 🧸","🧸"]]},
+  {r:"Rare",min:5000,max:20000,items:[["Clown fish 🐠","🐠"],["Salt fish 🐟","🐟"],["Shrimp 🦐","🦐"],["Crab 🦀","🦀"],["Shell 🐚","🐚"],["Lobster 🦞","🦞"]]},
+  {r:"Epic",min:25000,max:75000,items:[["Dolphin 🐬","🐬"],["Pufferfish 🐡","🐡"],["Squid 🦑","🦑"],["Otter 🦦","🦦"]]},
+  {r:"Legendary",min:100000,max:500000,items:[["Shark 🦈","🦈"],["Whale 🐋","🐋"],["Octopus 🐙","🐙"],["Seasnake 🐍","🐍"]]},
+  {r:"Mythic",min:1000000,max:5000000,items:[["Unicorn 🦄","🦄"],["Alien 👽","👽"],["Aeroplane ✈️","✈️"],["Bag of money 💰","💰"]]},
+  {r:"Exotic",min:10000000,max:50000000,items:[["Star 🎇","🎇"],["Godly Sandwich 🥪","🥪"],["Lost King 🤴","🤴"]]},
+  {r:"Celestial",min:100000000,max:1000000000,items:[["Supernova 🌌","🌌"],["Meteor ☄️","☄️"],["Space craft 🛰️","🛰️"]]}
+ ];
+ const level=Math.max(0,Math.min(8,Number(game.lureLevel)||0));
+ const low=level, high=level+1;
+ const chanceHigh=level>=7?.05:.20;
+ const picked=Math.random()<chanceHigh?pools[high]:pools[low];
+ const item=picked.items[Math.floor(Math.random()*picked.items.length)];
+ return {rarity:picked.r,item:item[0],icon:item[1],lbs:Math.floor(picked.min+Math.random()*(picked.max-picked.min+1))};
+}
+function renderCrazyQuestion(){
+ const scene=document.getElementById("crazyCastingScene"),normal=document.getElementById("normalQuestionArea");
+ if(!scene||!normal)return;
+ scene.style.display="none";normal.style.display="block";
+ game.roundId=(game.roundId||0)+1;const q=randomQuestion();game.currentQuestion=q;game.questionsAsked++;
+ document.getElementById("qcat").textContent=q.cat||"Review";document.getElementById("questionText").textContent=q.q;
+ let fv=document.getElementById("flagQuestionVisual");if(q.flagImage){if(!fv){fv=document.createElement("img");fv.id="flagQuestionVisual";fv.className="flagQuestionVisual";document.getElementById("questionText").after(fv)}fv.src=q.flagImage;fv.alt="Flag shown for the question";fv.style.display="block"}else if(fv)fv.style.display="none";
+ let shuffled=q.a.map((v,i)=>({v,i})).sort(()=>Math.random()-.5);document.getElementById("answers").innerHTML=shuffled.map(x=>`<button type="button" class="answer" onclick="answer(this,${x.i})">${x.v}</button>`).join("");
+ updateRunStats();
+}
+function crazyCatch(){
+ if(game._finished||Date.now()>=game.deadline)return finishGame();
+ const reward=crazyRewardRoll();game.crazyReward=reward;game.gold+=reward.lbs;
+ let upgraded=false;
+ if(game.lureLevel<8 && Math.random()<.10){game.lureLevel++;game.lureUpgraded=true;upgraded=true;}
+ updateRunStats();renderLeaderboard();
+ const scene=document.getElementById("crazyCastingScene");
+ if(scene){
+   scene.style.display="block";
+   scene.innerHTML=`<div class="crazyWater"></div><div class="crazyBridge"><div class="crazyRail"><i class="crazyPost a"></i><i class="crazyPost b"></i><i class="crazyPost c"></i></div></div><div class="crazyPlayer">${getBloxIcon(state.equipped)}</div><div class="crazyReward crazyRewardAnimated"><div class="crazyRewardIcon">${reward.icon}</div><div class="crazyRewardName">${esc(reward.item)}</div><div class="crazyRewardLbs">+${reward.lbs.toLocaleString()} lbs</div><div class="small">${reward.rarity}</div>${upgraded?`<div class="crazyCatch lure">🎣 LURE UPGRADE!<br><span class="small">Rarities shifted: lowest is now ${["Trash","Common","Uncommon","Rare","Epic","Legendary","Mythic","Exotic","Celestial"][game.lureLevel]} (${game.lureLevel>=7?"95":"80"}%) and highest is ${["Common","Uncommon","Rare","Epic","Legendary","Mythic","Exotic","Celestial"][game.lureLevel]} (${game.lureLevel>=7?"5":"20"}%).</span></div>`:""}</div>`;
+ }
+ game.phase="castingReward";game.locked=true;save();
+ clearTimeout(game.crazyRewardTimeout);
+ game.crazyRewardTimeout=setTimeout(()=>{
+   if(game._finished||Date.now()>=game.deadline)return finishGame();
+   game.crazyRewardTimeout=null;game.phase="castingIdle";game.locked=false;renderCrazyCasting();updateRunStats();
+ },1400);
+}
+function renderQuestion(){
+ if(game.mode==="Crazy Casting"){renderCrazyCasting();return;}
+ if(game.mode==="Heated Hackers"){
+   if(game.phase==="hackerPassword"){document.getElementById("normalQuestionArea").style.display="none";document.getElementById("hackerBoxArea").style.display="none";document.getElementById("hackerPasswordGate").style.display="block";return;}
+   if(game.phase==="hackerBoxes")return;
+   document.getElementById("hackerPasswordGate").style.display="none";document.getElementById("hackerBoxArea").style.display="none";document.getElementById("normalQuestionArea").style.display="block";
+ }
+ if(game._finished||game.phase==="finished")return;
+ if(Date.now()>=game.deadline)return finishGame();
+ game.phase="question";game.locked=false;game.chestActive=false;game.chestRewards=[];
+ const roundId=(game.roundId||0)+1;game.roundId=roundId;
+ let q=randomQuestion();game.currentQuestion=q;game.questionsAsked++;
+ document.getElementById("qcat").textContent=q.cat||"Review";
+ document.getElementById("questionText").textContent=q.q;
+ const qCard=document.querySelector("#play .question");let fv=document.getElementById("flagQuestionVisual");if(q.flagImage){if(!fv){fv=document.createElement("img");fv.id="flagQuestionVisual";fv.className="flagQuestionVisual";document.getElementById("questionText").after(fv)}fv.src=q.flagImage;fv.alt="Flag shown for the question";fv.style.display="block"}else if(fv){fv.style.display="none"}
+ let shuffled=q.a.map((v,i)=>({v,i})).sort(()=>Math.random()-.5);
+ document.getElementById("answers").innerHTML=shuffled.map(x=>`<button type="button" class="answer" onclick="answer(this,${x.i})">${x.v}</button>`).join("");
+ updateRunStats();
+}
+function answer(btn,idx){
+ if(game._finished||game.phase!=="question"||game.locked)return;
+ let q=game.currentQuestion,correct=idx===0;
+ game.phase="answering";game.locked=true;
+ document.querySelectorAll("#answers .answer").forEach(b=>b.disabled=true);
+ if(btn)btn.classList.add(correct?"correct":"wrong");
+ if(game.mode==="Study"){
+   if(correct){
+     game.correct++;
+     game.earned+=1;
+     updateRunStats();
+     setTimeout(()=>{
+       if(game._finished||Date.now()>=game.deadline)return finishGame();
+       game.locked=false;game.phase="question";renderQuestion();
+     },400);
+   }else{
+     updateRunStats();
+     game.phase="wrong";
+     showWrongCountdown(()=>{
+       if(game._finished||Date.now()>=game.deadline)return finishGame();
+       game.locked=false;
+       game.phase="question";
+       show("play");
+       renderQuestion();
+     });
+   }
+   return;
+ }
+ if(correct){
+   if(game.mode==="Crazy Casting"){game.correct++;game.earned+=3;game.phase="catching";game.locked=true;crazyCatch();return;}
+   game.correct++;game.earned+=3;updateRunStats();renderLeaderboard();
+   if(Date.now()>=game.deadline)return finishGame();
+   if(game.mode==="Heated Hackers"){
+     game.phase="hackerBoxes";game.locked=true;game.hackerHoverIndex=null;
+     document.getElementById("normalQuestionArea").style.display="none";document.getElementById("hackerBoxArea").style.display="block";document.getElementById("hackerPasswordGate").style.display="none";
+     startHackerBoxSelection();
+     return;
+   }
+   const roundId=game.roundId;
+   clearTimeout(game.chestTimeout);
+   game.chestTimeout=setTimeout(()=>{
+     game.chestTimeout=null;
+     if(game._finished||game.phase!=="answering"||game.roundId!==roundId||Date.now()>=game.deadline)return;
+     show("chests");renderChests();
+   },250);
+ }else{
+   if(game.mode==="Crazy Casting"){game.phase="question";game.locked=false;setTimeout(()=>{if(!game._finished&&Date.now()<game.deadline)renderCrazyQuestion()},180);return;}
+   game.phase="wrong";
+   showWrongCountdown(()=>{
+     if(!game._finished&&Date.now()<game.deadline){game.locked=false;game.phase="question";show("play");renderQuestion();}
+   });
+ }
+}
+function hackerBoxReward(){let r=Math.random()*100;if(r<25)return{type:"add",value:10,name:"+10 Crypto"};if(r<40)return{type:"add",value:25,name:"+25 Crypto"};if(r<50)return{type:"add",value:50,name:"+50 Crypto"};if(r<57)return{type:"mult",value:2,name:"×2 Crypto"};if(r<60)return{type:"mult",value:3,name:"×3 Crypto"};return{type:"hack",name:"HACK"};}
+function hackerPasswordOptions(target){let correct=target.password||randomHackerPassword();let pool=[correct,randomHackerPassword(),randomHackerPassword(),randomHackerPassword()];pool=[...new Set(pool)];while(pool.length<3){const p=randomHackerPassword();if(!pool.includes(p))pool.push(p)}return pool.slice(0,3).sort(()=>Math.random()-.5);}
+function startHackerBoxSelection(){
+ clearInterval(game.hackerChoiceTimer);clearTimeout(game.hackerChoiceTimer);game.hackerChoiceTimer=null;game.hackerHoverIndex=null;
+ const area=document.getElementById("hackerBoxArea"),timer=document.getElementById("hackerBoxTimer");if(!area||game.mode!=="Heated Hackers"||game.phase!=="hackerBoxes")return;
+ area.innerHTML=`<div class="small">Move your mouse onto a box. The box you are touching when the timer reaches 0 is selected.</div><div id="hackerBoxTimer" class="hackerBoxTimer">3.0</div><div class="hackerBoxHint">No box touched = no reward</div><h2>❓ ❓ ❓</h2><div class="hackerBoxGrid"><button type="button" data-box="0">❓<span>1</span></button><button type="button" data-box="1">❓<span>2</span></button><button type="button" data-box="2">❓<span>3</span></button></div>`;
+ const buttons=[...area.querySelectorAll(".hackerBoxGrid button")];
+ buttons.forEach(btn=>{
+   btn.addEventListener("mouseenter",()=>{if(game.phase!=="hackerBoxes")return;buttons.forEach(b=>b.classList.remove("hoverSelected"));btn.classList.add("hoverSelected");game.hackerHoverIndex=Number(btn.dataset.box);});
+   btn.addEventListener("mousemove",()=>{if(game.phase!=="hackerBoxes")return;if(game.hackerHoverIndex!==Number(btn.dataset.box)){buttons.forEach(b=>b.classList.remove("hoverSelected"));btn.classList.add("hoverSelected");game.hackerHoverIndex=Number(btn.dataset.box);}});
+ });
+ const end=Date.now()+3000;game.hackerChoiceEnd=end;
+ const tick=()=>{
+   if(game.mode!=="Heated Hackers"||game.phase!=="hackerBoxes"||game._finished)return;
+   const remaining=Math.max(0,end-Date.now());
+   const el=document.getElementById("hackerBoxTimer");if(el)el.textContent=(remaining/1000).toFixed(1);
+   if(remaining<=0){game.hackerChoiceTimer=null;resolveHackerBox(game.hackerHoverIndex);return;}
+   game.hackerChoiceTimer=setTimeout(tick,50);
+ };
+ tick();
+}
+function showCryptoRewardVisual(big,sub,duration,done){
+ const overlay=document.getElementById("cryptoRewardOverlay"),bigEl=document.getElementById("cryptoRewardBig"),subEl=document.getElementById("cryptoRewardSub");
+ if(!overlay){done();return;}
+ bigEl.textContent=big;subEl.textContent=sub;
+ overlay.classList.remove("open");void overlay.offsetWidth;overlay.classList.add("open");overlay.setAttribute("aria-hidden","false");
+ clearTimeout(game.cryptoRewardTimer);
+ game.cryptoRewardTimer=setTimeout(()=>{game.cryptoRewardTimer=null;overlay.classList.remove("open");overlay.setAttribute("aria-hidden","true");done();},duration);
+}
+function resolveHackerBox(index){
+ if(game.mode!=="Heated Hackers"||game.phase!=="hackerBoxes"||game._finished)return;
+ clearTimeout(game.hackerChoiceTimer);game.hackerChoiceTimer=null;
+ if(index===null||index===undefined){toast("No box selected! You get nothing.");return finishHackerBox();}
+ const reward=hackerBoxReward();
+ if(reward.type==="add"){
+   game.gold+=reward.value;updateRunStats();renderLeaderboard();
+   return showCryptoRewardVisual(`+${reward.value}`,"Crypto ©",900,()=>{if(!game._finished)finishHackerBox();});
+ }
+ if(reward.type==="mult"){
+   const before=game.gold;game.gold=before>0?before*reward.value:reward.value*10;updateRunStats();renderLeaderboard();
+   return showCryptoRewardVisual(`×${reward.value}`,"Crypto Multiplier",900,()=>{if(!game._finished)finishHackerBox();});
+ }
+ const targets=game.bots.filter(b=>b.gold>0);if(!targets.length){toast("No one has Crypto to hack!");return finishHackerBox();}
+ const target=targets[Math.floor(Math.random()*targets.length)];game.hackerTarget=target;const opts=hackerPasswordOptions(target);game.locked=true;
+ showCryptoRewardVisual("HACK","Hack another player!",900,()=>{if(!game._finished&&game.phase==="hackerBoxes")startHackerPasswordSelection(target,opts);});
+}
+function startHackerPasswordSelection(target,opts){
+ clearTimeout(game.hackerChoiceTimer);game.hackerChoiceTimer=null;game.hackerHoverIndex=null;
+ const area=document.getElementById("hackerBoxArea");if(!area||game.mode!=="Heated Hackers"||game.phase!=="hackerBoxes")return;
+ area.innerHTML=`<div class="hackerHackCard"><div class="hackerIcon">💻</div><h2>HACK ${esc(target.name)}!</h2><p>Move your mouse onto a password. The one you are touching when the timer reaches 0 is selected.</p><div id="hackerPasswordTimer" class="hackerBoxTimer">3.0</div><div class="hackerBoxHint">No password touched = no hack</div><div class="hackerOptions">${opts.map((o,i)=>`<button type="button" data-password-index="${i}">🔑 ${esc(o)}</button>`).join("")}</div></div>`;
+ const buttons=[...area.querySelectorAll(".hackerOptions button")];
+ buttons.forEach(btn=>{
+   btn.addEventListener("mouseenter",()=>{if(game.phase!=="hackerBoxes")return;buttons.forEach(b=>b.classList.remove("hoverSelected"));btn.classList.add("hoverSelected");game.hackerHoverIndex=Number(btn.dataset.passwordIndex);});
+   btn.addEventListener("mousemove",()=>{if(game.phase!=="hackerBoxes")return;if(game.hackerHoverIndex!==Number(btn.dataset.passwordIndex)){buttons.forEach(b=>b.classList.remove("hoverSelected"));btn.classList.add("hoverSelected");game.hackerHoverIndex=Number(btn.dataset.passwordIndex);}});
+ });
+ const end=Date.now()+3000;game.hackerChoiceEnd=end;
+ const tick=()=>{
+   if(game.mode!=="Heated Hackers"||game.phase!=="hackerBoxes"||game._finished)return;
+   const remaining=Math.max(0,end-Date.now());
+   const el=document.getElementById("hackerPasswordTimer");if(el)el.textContent=(remaining/1000).toFixed(1);
+   if(remaining<=0){game.hackerChoiceTimer=null;resolveHackerPassword(game.hackerHoverIndex,opts,target);return;}
+   game.hackerChoiceTimer=setTimeout(tick,50);
+ };
+ tick();
+}
+function resolveHackerPassword(index,opts,target){
+ if(game.mode!=="Heated Hackers"||game.phase!=="hackerBoxes"||game._finished)return;
+ clearTimeout(game.hackerChoiceTimer);game.hackerChoiceTimer=null;
+ if(index===null||index===undefined){toast("No password selected! The hack failed.");return finishHackerBox();}
+ const chosen=opts[index];
+ const correct=chosen===target.password;
+ let amount=0;
+ if(correct){
+   const pct=.20+Math.random()*.30;
+   amount=Math.max(1,Math.floor(target.gold*pct));
+   target.gold=Math.max(0,target.gold-amount);game.gold+=amount;
+   renderLeaderboard();updateRunStats();
+ }
+ const resultTitle=correct?"PASSWORD CORRECT":"PASSWORD WRONG";
+ const resultText=correct
+   ? `The password "${chosen}" was correct.`
+   : `The password "${chosen}" was not correct.`;
+ const lockEmoji=correct?"🔓":"🔒";
+ const resultClass=correct?"hackerPasswordCorrect":"hackerPasswordWrong";
+ const area=document.getElementById("hackerBoxArea");
+ if(area){
+   area.innerHTML=`<div class="hackerPasswordResult ${resultClass}">
+     <div class="hackerResultLock">${lockEmoji}</div>
+     <h2>${resultTitle}</h2>
+     <p>${esc(resultText)}</p>
+     ${correct?`<div class="hackerStolen">+${amount} Crypto ©</div>`:""}
+   </div>`;
+ }
+ if(correct) toast(`HACK SUCCESS! You stole ${amount} Crypto ©!`);
+ else toast("Wrong password! The hack failed.");
+ clearTimeout(game.hackerResultTimer);
+ game.hackerResultTimer=setTimeout(()=>{game.hackerResultTimer=null;if(!game._finished)finishHackerBox();},1800);
+}
+function finishHackerBox(){game.hackerTarget=null;game.locked=false;game.phase="question";updateRunStats();renderLeaderboard();if(game._finished||Date.now()>=game.deadline)return finishGame();show("play");renderQuestion();}
+function showWrongCountdown(done){const ov=document.getElementById("wrongCountdown"),num=document.getElementById("wrongCountdownNum");if(!ov||!num){done();return;}let vals=["3","2","1"];let i=0;ov.classList.add("open");ov.setAttribute("aria-hidden","false");function tick(){num.textContent=vals[i];num.style.animation="none";void num.offsetWidth;num.style.animation="countPop .8s ease both";if(i<2){i++;setTimeout(tick,1000)}else setTimeout(()=>{ov.classList.remove("open");ov.setAttribute("aria-hidden","true");done()},1000)}tick()}
+let chestRenderId=0;
+function treasureReward(){
+ const r=Math.random()*100;
+ if(r<10)return {type:"swap",name:"SWAP! 🔄"};
+ if(r<25)return {type:"steal",name:"STEAL 🦹‍♂️"};
+ const n=(r-25)/75*100;
+ if(n<45)return {type:"add",value:10,name:"+10 Gold"};
+ if(n<70)return {type:"add",value:25,name:"+25 Gold"};
+ if(n<84)return {type:"add",value:50,name:"+50 Gold"};
+ if(n<94)return {type:"add",value:100,name:"+100 Gold"};
+ if(n<98)return {type:"add",value:250,name:"+250 Gold"};
+ return {type:"mult",value:2,name:"DOUBLE GOLD!"};
+}
+function startPlayerSwap(){
+ const targets=game.bots.map((b,i)=>({type:"bot",index:i}));if(!targets.length){toast("No one to swap with!");game.phase="question";game.locked=false;show("play");renderQuestion();return;}
+ const target=targets[Math.floor(Math.random()*targets.length)];
+ const bot=game.bots[target.index];
+ const overlay=document.getElementById("swapOverlay");
+ if(!overlay){const old=game.gold;game.gold=Math.max(0,bot.gold);bot.gold=old;updateRunStats();renderLeaderboard();toast(`SWAP! You swapped Gold with ${bot.name}! 🔄`);game.phase="question";game.locked=false;show("play");renderQuestion();return;}
+ game.phase="swap";game.locked=true;
+ document.getElementById("swapYourBlox").textContent=getBloxIcon(state.equipped);
+ document.getElementById("swapYourName").textContent=state.username||"You";
+ document.getElementById("swapTheirBlox").textContent=bot.icon||"👤";
+ document.getElementById("swapTheirName").textContent=bot.name||"Player";
+ overlay.classList.remove("open");void overlay.offsetWidth;overlay.classList.add("open");overlay.setAttribute("aria-hidden","false");
+ const finish=()=>{
+   overlay.classList.remove("open");overlay.setAttribute("aria-hidden","true");
+   const old=game.gold;game.gold=Math.max(0,bot.gold);bot.gold=old;
+   updateRunStats();renderLeaderboard();toast(`SWAP! You swapped Gold with ${bot.name}! 🔄`);
+   game.phase="question";game.locked=false;
+   if(!game._finished&&Date.now()<game.deadline){show("play");renderQuestion();}else finishGame();
+ };
+ clearTimeout(game.swapTimer);game.swapTimer=setTimeout(()=>{game.swapTimer=null;finish();},1400);
+}
+function randomStealTarget(exclude){
+ const pool=[{type:"player",gold:Math.max(0,game.gold)}].concat(game.bots.map((b,i)=>({type:"bot",index:i,gold:Math.max(0,b.gold)})));
+ const eligible=pool.filter(t=>t.gold>0 && !(exclude&&t.type===exclude.type&&t.index===exclude.index));
+ return eligible.length?eligible[Math.floor(Math.random()*eligible.length)]:null;
+}
+function doSteal(from,target){
+ if(!target)return 0;
+ const pct=.20+Math.random()*.40;
+ const amount=Math.max(1,Math.floor(target.gold*pct));
+ if(target.type==="player"){game.gold=Math.max(0,game.gold-amount)}else game.bots[target.index].gold=Math.max(0,game.bots[target.index].gold-amount);
+ if(from.type==="player")game.gold+=amount;else game.bots[from.index].gold+=amount;
+ return amount;
+}
+function startPlayerSteal(){
+ // The flying-cash UI is ONLY allowed to exist for a real player STEAL reward.
+ const overlay=document.getElementById("stealOverlay"),cash=document.getElementById("stealCash"),msg=document.getElementById("stealMessage"),timerText=document.getElementById("stealTimerText");
+ overlay.classList.remove("open");
+ overlay.setAttribute("aria-hidden","true");
+ cash.style.display="none";
+ game.stealActive=false;
+ const target=randomStealTarget({type:"player"});
+ if(!target || game._finished || game.phase!=="resolving"){
+   game.stealTarget=null;game.phase="question";game.locked=false;game.chestRewards=[];game.chestActive=false;show("play");renderQuestion();return;
+ }
+ game.phase="steal";game.stealActive=true;game.locked=true;game.stealTarget=target;
+ // Only after a valid STEAL reward and valid target are confirmed do we reveal the UI.
+ cash.style.display="block";cash.style.transition="left .72s ease, top .72s ease";
+ overlay.setAttribute("aria-hidden","false");
+ overlay.classList.add("open");
+ msg.textContent=`STEAL! Grab the cash from ${target.type==="player"?"You":game.bots[target.index].name}! 💸`;
+ const move=()=>{if(!game.stealActive)return;cash.style.left=(8+Math.random()*84)+"%";cash.style.top=(24+Math.random()*58)+"%"};
+ move();
+ const finish=(success)=>{
+   clearInterval(game.stealMoveTimer);clearInterval(game.stealCountdownTimer);clearTimeout(game.stealTimer);game.stealMoveTimer=null;game.stealCountdownTimer=null;game.stealTimer=null;
+   overlay.classList.remove("open");overlay.setAttribute("aria-hidden","true");cash.style.display="none";game.stealActive=false;game.stealTarget=null;
+   if(success){const amount=doSteal({type:"player"},target);toast(`Stole ${amount} Gold! 🦹‍♂️`);updateRunStats();renderLeaderboard()}else toast("The cash escaped! No steal.");
+   game.chestRewards=[];game.locked=false;game.phase="question";show("play");renderQuestion();
+ };
+ cash.onclick=()=>{if(game.stealActive)finish(true)};
+ let left=5000;timerText.textContent="5.0";
+ game.stealMoveTimer=setInterval(move,800);
+ game.stealCountdownTimer=setInterval(()=>{left-=100;timerText.textContent=(Math.max(0,left)/1000).toFixed(1)},100);
+ game.stealTimer=setTimeout(()=>finish(false),5000);
+}
+function botSteal(bot){
+ if(game._finished||Math.random()<.50)return;
+ const from={type:"bot",index:game.bots.indexOf(bot)};
+ const target=randomStealTarget(from);
+ if(!target)return;
+ const amount=doSteal(from,target);
+ renderLeaderboard();
+}
+function renderChests(){
+ if(game._finished||Date.now()>=game.deadline)return finishGame();
+ clearTimeout(game.chestTimeout);game.chestTimeout=null;
+ game.locked=true;game.phase="chest";game.chestActive=true;
+ const renderId=++chestRenderId;game.chestRenderId=renderId;
+ game.chestRewards=[treasureReward()];
+ const grid=document.getElementById("chestGrid");
+ grid.innerHTML=`<div class="singleChestArea"><div class="treasureChestButton autoChest" id="treasureChestButton"><div class="treasureChestIcon chestPulse">🧰</div><h2>Treasure Chest</h2><p>Opening...</p></div></div>`;
+ const icon=document.querySelector("#treasureChestButton .treasureChestIcon");
+ document.getElementById("chestTime").textContent=formatTime(game.deadline-Date.now());
+ game.chestTimeout=setTimeout(()=>{
+   game.chestTimeout=null;
+   if(game._finished||renderId!==chestRenderId||game.phase!=="chest"||!game.chestActive)return;
+   pickChest(renderId);
+ },1000);
+}
+function pickChest(renderId){
+ const button=document.getElementById("treasureChestButton");
+ if(!button||game._finished||game.phase!=="chest"||!game.chestActive)return;
+ if(renderId!==chestRenderId||renderId!==game.chestRenderId)return;
+ const reward=game.chestRewards[0];if(!reward)return;
+ game.phase="resolving";game.chestActive=false;
+ if(reward.type==="steal"){startPlayerSteal();return}
+ if(reward.type==="swap"){startPlayerSwap();return}
+ const before=game.gold;
+ if(reward.type==="add")game.gold+=reward.value;
+ else if(reward.type==="mult")game.gold*=reward.value;
+ updateRunStats();renderLeaderboard();toast(`${reward.name}!`);
+ const icon=button.querySelector(".treasureChestIcon");
+ if(icon){icon.classList.remove("chestPulse");void icon.offsetWidth;icon.classList.add("chestPulse");}
+ button.classList.add("revealed");
+ const rewardAmount=Math.max(0,Math.floor(game.gold-before));
+const bagCount=rewardAmount<50?1:rewardAmount<100?2:rewardAmount<250?3:rewardAmount<500?4:rewardAmount<1000?5:rewardAmount<2500?6:rewardAmount<5000?7:rewardAmount<10000?8:rewardAmount<25000?10:12;
+const bags="💰".repeat(bagCount);
+button.innerHTML=`<div class="treasureRewardBags" aria-label="${bagCount} money bags">${bags}</div><h2>${reward.name}</h2><p>Gold: ${before} → ${game.gold}</p>`;
+ const chosenRender=renderId;
+ game.chestTimeout=setTimeout(()=>{
+   game.chestTimeout=null;
+   if(game._finished||chosenRender!==chestRenderId||game.phase!=="resolving")return;
+   game.locked=false;game.chestRewards=[];game.chestActive=false;game.phase="question";
+   show("play");renderQuestion();
+ },900);
+}
+function finishGame(){
+ if(game._finished)return;game._finished=true;game.locked=true;clearInterval(game.timer);game.timer=null;clearInterval(game.botTimer);game.botTimer=null;clearInterval(game.botStealTimer);game.botStealTimer=null;clearTimeout(game.stealTimer);clearInterval(game.stealMoveTimer);clearInterval(game.stealCountdownTimer);document.getElementById("stealOverlay")?.classList.remove("open");document.getElementById("stealOverlay")?.setAttribute("aria-hidden","true");document.getElementById("stealCash")?.style.setProperty("display","none");game.stealActive=false;document.getElementById("stealOverlay")?.classList.remove("open");document.getElementById("stealOverlay")?.setAttribute("aria-hidden","true");document.getElementById("stealCash")?.style.setProperty("display","none");
+ renderLeaderboard();
+ if(game.playType==="solo"){
+   game.rankings=[];
+   if(game.earned>0){state.tokens+=game.earned;}
+   state.last={score:game.gold,correct:game.correct,total:game.questionsAsked,tokens:game.earned,gold:game.gold,place:null,bonus:0,rankings:[]};
+   save();show("results");renderResults();toast("Time's up!");return;
+ }
+ if(game.earned>0){state.tokens+=game.earned;}
+ let players=[{name:state.username||"You",icon:getBloxIcon(state.equipped),gold:game.gold,me:true,nametag:state.equippedNametag||"normal"},...game.bots.map(b=>({...b,me:false}))].sort((a,b)=>b.gold-a.gold);
+ game.rankings=players;let meIndex=players.findIndex(p=>p.me);let place=meIndex+1;let bonus=place===1?75:place===2?35:place===3?15:0;
+ if(bonus){state.tokens+=bonus;game.earned+=bonus;save();}
+ state.last={score:game.gold,correct:game.correct,total:game.questionsAsked,tokens:game.earned,gold:game.gold,place,bonus,rankings:players};
+ save();show("results");renderResults();
+ toast(place<=3?`You placed ${place===1?"1st":place===2?"2nd":"3rd"} — +${bonus} coins!`:"Time's up!");
+}
+function renderResults(){
+ document.getElementById("lastScore").textContent=state.last.gold??state.last.score??0;
+ const rcl=document.getElementById("resultsCurrencyLabel");if(rcl)rcl.textContent=game.mode==="Crazy Casting"?"LBS caught":game.mode==="Heated Hackers"?"Crypto collected":"Gold collected";
+ document.getElementById("lastAcc").textContent=(state.last.total?Math.round(state.last.correct/state.last.total*100):0)+"%";
+ document.getElementById("lastTokens").textContent=state.last.tokens||0;
+ let rows=(state.last.rankings||[]).slice(0,3).map((p,i)=>{let bonus=i===0?75:i===1?35:15;return `<div class="podiumRow"><b>${i+1}</b><span style="font-size:32px">${p.icon}</span><b>${renderTag(p.name+(p.me?" (You)":""),p.nametag||"normal")}</b><span class="score">${p.gold} ${game.mode==="Heated Hackers"?"Crypto":game.mode==="Crazy Casting"?"LBS":"Gold"}</span>${p.me?`<span class="placeBonus">+${bonus} coins</span>`:""}</div>`}).join("");
+ document.getElementById("reportRows").innerHTML=game.playType==="solo"?`<div class="leader"><b>Solo run</b><span>No opponents</span><span class="score">No placement rewards</span></div>`:`<div class="leader"><b>Your place</b><span>${state.last.place||"—"}</span><span class="score">Bonus: +${state.last.bonus||0} coins</span></div><h3 id="finishPodium">🏆 Final Top 3</h3>${rows}`;
+}
+function buyNametag(tag){
+ const prices={dot:200,yinyang:300,fantasy:500};
+ if(state.nametags.includes(tag))return toast("You already own this nametag!");
+ const price=prices[tag];
+ if(state.tokens<price)return toast("Not enough coins!");
+ state.tokens-=price;state.nametags.push(tag);save();renderMarket();toast(`${nametagLabel(tag)} nametag unlocked!`);
+}
+function equipNametag(tag){
+ if(tag!=="normal"&&!state.nametags.includes(tag))return;
+ state.equippedNametag=tag;save();renderMarket();renderLeaderboard();toast(`${nametagLabel(tag)} nametag equipped!`);
+}
+function renderMarket(){
+ const packs=boxData.map((b,i)=>`<div class="box"><div class="boxicon">${b.icon}</div><h2>${b.name}</h2><p><b><img class="coinIcon small" src="quizblox-coin.png" alt="Bloxcoin"> ${b.cost} coins</b></p><p class="small">Open the pack to reveal your Blox and its individual drop chance.</p><label class="small" for="packQty${i}">How many packs?</label><select id="packQty${i}" aria-label="How many ${b.name} packs to open"><option value="1">1 Pack</option><option value="3">3 Packs</option><option value="5">5 Packs</option><option value="10">10 Packs</option><option value="25">25 Packs</option><option value="50">50 Packs</option><option value="100">100 Packs</option><option value="200">200 Packs</option></select><button class="primary gold" onclick="openBoxes(${i})">Open Packs</button></div>`).join("");
+ const tags=[
+  {id:"dot",name:"Dot Nametag",price:200,preview:"Dot"},
+  {id:"yinyang",name:"Ying Yang Nametag",price:300,preview:"Ying Yang"},
+  {id:"fantasy",name:"Fantasy Nametag",price:500,preview:"Fantasy"}
+ ];
+ const tagCards=tags.map(t=>{const owned=state.nametags.includes(t.id),equipped=state.equippedNametag===t.id;return `<div class="box tagShopCard"><h2>🏷️ ${t.name}</h2><div class="tagPreview">${renderTag(t.preview,t.id)}</div><p><b><img class="coinIcon small" src="quizblox-coin.png" alt="Bloxcoin"> ${t.price} coins</b></p>${owned?`<p class="ownedTag">✓ Owned</p><button class="primary" onclick="equipNametag('${t.id}')">${equipped?"Equipped":"Equip"}</button>`:`<button class="primary gold" onclick="buyNametag('${t.id}')">Buy</button>`}</div>`}).join("");
+ document.getElementById("boxes").innerHTML=`${packs}<div class="box tagShopCard"><h2>🏷️ Normal Nametag</h2><div class="tagPreview">${renderTag("Normal","normal")}</div><p class="small">Your plain default backdrop.</p><button class="primary" onclick="equipNametag('normal')">${state.equippedNametag==="normal"?"Equipped":"Equip"}</button></div>${tagCards}`;
+}
+let adminOpen=false;
+function toggleAdmin(){adminOpen=!adminOpen;let p=document.getElementById("adminPanel");p.style.display=adminOpen?"block":"none";if(adminOpen){let i=document.getElementById("adminCommand");i.value="";i.focus()}}
+function runAdminCommand(raw){
+ let cmd=raw.trim(),m;
+ if((m=cmd.match(/^\/givecoins\s+(-?\d+(?:\.\d+)?)$/i))){let amount=Number(m[1]);state.tokens=Math.max(0,state.tokens+amount);save();toast(`${amount>=0?"Gave":"Removed"} ${Math.abs(amount)} coins`);return true}
+ if((m=cmd.match(/^\/giveblox\s+(.+)$/i))){let name=m[1].trim().toLowerCase();let item=boxData.flatMap(p=>p.items).find(x=>x.name.toLowerCase()===name);if(!item)return false;if(!state.blox.includes(item.name))state.blox.push(item.name);save();renderCollection();toast(`Gave ${item.name}!`);return true}
+ if((m=cmd.match(/^\/rig\s+(common|uncommon|rare|epic|legendary|mythic|exotic)$/i))){
+  let rarity=m[1].charAt(0).toUpperCase()+m[1].slice(1).toLowerCase();
+  game.adminLuck=rarity;toast(`Next pack rigged to ${rarity}`);return true
+}
+ if((m=cmd.match(/^\/Xray\s+hunt\s+(true|false|trule)$/i))){game.xrayHunt=m[1].toLowerCase()!=="false";toast(`Xray Hunt ${game.xrayHunt?"ON":"OFF"}`);return true}
+ return false;
+}
+document.addEventListener("keydown",e=>{if(e.key.length===1){if(!adminOpen){window.__adminBuffer=(window.__adminBuffer||"")+e.key.toLowerCase();if(window.__adminBuffer.length>5)window.__adminBuffer=window.__adminBuffer.slice(-5);if(window.__adminBuffer==="admin"){window.__adminBuffer="";toggleAdmin()}}}else if(e.key==="Escape"&&adminOpen)toggleAdmin()});
+document.getElementById("adminCommand").addEventListener("keydown",e=>{if(e.key==="Enter"){let ok=runAdminCommand(e.target.value);if(ok){e.target.value="";toggleAdmin()}else toast("Unknown admin command")}});
+function chooseRarity(weights){let r=Math.random()*100,sum=0;for(let x of Object.keys(weights)){sum+=weights[x];if(r<=sum)return x}return "Common"}
+function openBoxes(i){
+ let b=boxData[i];
+ const sel=document.getElementById(`packQty${i}`); let raw=sel?sel.value:"1";
+ let count=parseInt(raw,10)||1;
+ if(count<1)return toast("Not enough coins!");
+ if(state.tokens<b.cost*count)return toast(`You need ${b.cost*count} coins to open ${count} packs.`);
+ state.tokens-=b.cost*count;
+ let results=[];
+ for(let n=0;n<count;n++){
+   let hiddenItem=null;
+   const riggedRarity=game.adminLuck;
+   if(riggedRarity==="Exotic"){
+     const exoticPool=b.items.filter(x=>x.hidden&&x.rarity==="Exotic");
+     if(exoticPool.length) hiddenItem=exoticPool[Math.floor(Math.random()*exoticPool.length)];
+   } else {
+     for(const candidate of b.items.filter(x=>x.hidden)){
+       if(Math.random()*100 < Number(candidate.hiddenChance||0)){hiddenItem=candidate;break;}
+     }
+   }
+   let item=hiddenItem;
+   let rarity=item?item.rarity:(riggedRarity||chooseRarity(b.weights));
+   if(!item){let pool=b.items.filter(x=>x.rarity===rarity&&!x.hidden);if(!pool.length){game.adminLuck=null;state.tokens+=b.cost;continue;}item=pool[Math.floor(Math.random()*pool.length)];}
+   game.adminLuck=null;
+   let duplicate=state.blox.includes(item.name);
+   const sameRarityCount=b.items.filter(x=>x.rarity===item.rarity&&!x.hidden).length||1;
+   const itemChance=item.hidden?Number(item.hiddenChance).toFixed(2):(Number(b.weights[item.rarity]||0)/sameRarityCount).toFixed(2);
+   if(!duplicate)state.blox.push(item.name);else state.tokens+=Math.floor(b.cost*.25);
+   results.push({item,rarity,duplicate,itemChance});
+ }
+ save();
+ const modal=document.getElementById("modal");
+ modal.classList.remove("revealLegendary","revealMythic","multiOpen","exoticReveal");
+ modal.classList.add("multiOpen");
+ const spinIcons=Array.from({length:Math.min(8,count)},()=>`<div class="packSpinCard">${b.icon}</div>`).join("");
+ document.getElementById("modalContent").innerHTML=`<div class="packOpening"><div class="packOpeningTitle">Opening ${count} ${b.name}${count===1?"":"s"}...</div><div class="packSpinner">${spinIcons}</div><p class="small">Get ready to reveal your Blox!</p></div>`;
+ modal.classList.add("open");
+ setTimeout(()=>showMultiResults(b,results),2200);
+}
+function showMultiResults(b,results){
+ const modal=document.getElementById("modal");
+ const rarityOrder={Common:0,Uncommon:1,Rare:2,Epic:3,Legendary:4,Mythic:5,Exotic:6,Chroma:7};
+ const hasExotic=results.some(r=>r.rarity==="Exotic");
+ const grouped=new Map();
+ results.forEach(r=>{const key=r.item.name+"|"+r.rarity;if(!grouped.has(key))grouped.set(key,{...r,count:0,newCount:0,dupCount:0});const g=grouped.get(key);g.count++;if(r.duplicate)g.dupCount++;else g.newCount++;});
+ const groups=[...grouped.values()].sort((a,b)=>(rarityOrder[a.rarity]??99)-(rarityOrder[b.rarity]??99)||a.item.name.localeCompare(b.item.name));
+ const renderResults=()=>{
+  const cards=groups.map(r=>`<div class="multiResultCard"><div class="multiResultIcon">${r.item.icon}</div><div class="multiResultName">${r.item.name}${r.count>1?` <b>×${r.count}</b>`:""}</div><div class="multiResultRarity ${r.rarity.toLowerCase()}">${r.rarity}</div><div class="multiResultChance">${r.itemChance}% individual chance</div><div class="small">${r.newCount?`${r.newCount} new`:""}${r.newCount&&r.dupCount?" · ":""}${r.dupCount?`${r.dupCount} duplicate${r.dupCount===1?"":"s"}`:""}</div></div>`).join("");
+  document.getElementById("modalContent").innerHTML=`<h2>🎁 Pack Results</h2><p><b>You opened ${results.length} ${b.name}${results.length===1?"":"s"}!</b></p><div class="multiResults">${cards}</div>`;
+  if(results.some(r=>r.rarity==="Legendary"))modal.classList.add("revealLegendary");
+  if(results.some(r=>r.rarity==="Mythic"))modal.classList.add("revealMythic");
+ };
+ if(hasExotic){
+   modal.classList.add("exoticReveal");
+   const exotic=results.filter(r=>r.rarity==="Exotic");
+   let n=0;
+   const next=()=>{if(n>=exotic.length){renderResults();return;}const r=exotic[n++];document.getElementById("modalContent").innerHTML=`<div class="packOpening"><h2>✨ HIDDEN BLOOK!</h2><div class="exoticFly">${r.item.icon}</div><p class="small">Exotic • ${r.item.name}</p></div>`;setTimeout(()=>{document.getElementById("modalContent").innerHTML=`<div class="packOpening"><div class="exoticBig">${r.item.icon}</div><h2>${r.item.name}</h2><div class="rarity exotic">EXOTIC</div></div>`;setTimeout(next,1300)},1800)};
+   next();
+ }else renderResults();
+}
+function openBox(i){openBoxes(i)}
+function closeModal(){let m=document.getElementById("modal");m.classList.remove("open","revealLegendary","revealMythic","multiOpen");renderMarket();renderCollection()}
+function renderCollection(){
+ document.getElementById("countBlox").textContent=state.blox.length;
+ document.getElementById("totalBlox").textContent=boxData.reduce((n,p)=>n+p.items.filter(x=>!x.hidden).length,0)+boxData.reduce((n,p)=>n+p.items.filter(x=>x.hidden).length,0);
+ document.getElementById("equipped").textContent=state.equipped;
+ const rarityOrder={Common:0,Uncommon:1,Rare:2,Epic:3,Legendary:4,Mythic:5,Exotic:6,Chroma:7};
+ const packClass={"Sport Pack":"sport","Animal Pack":"animal","Fruit Pack":"fruit"};
+ const renderItem=x=>{const own=state.blox.includes(x.name),selected=state.equipped===x.name;if(!own)return `<div class="collectionItem locked"><span class="avatar">${x.icon}</span></div>`;const rarityClass=x.rarity.toLowerCase();return `<div class="collectionItem ${rarityClass}" data-blox-name="${x.name.replace(/&/g,"&amp;").replace(/"/g,"&quot;")}"><span class="avatar">${x.icon}</span><div class="blookName">${x.name}</div><div class="rarity">${x.rarity}</div><button class="muted equipBtn" onclick="event.stopPropagation();equip('${x.name.replace(/'/g,"\'")}')">${selected?"Equipped":"Equip"}</button></div>`};
+ const cols=boxData.map(pack=>{const items=pack.items.filter(x=>!x.hidden).sort((a,b)=>(rarityOrder[a.rarity]??99)-(rarityOrder[b.rarity]??99));return `<div class="packColumn ${packClass[pack.name]||""}"><h2>${pack.icon} ${pack.name}</h2><div class="packItems">${items.map(renderItem).join("")}</div></div>`}).join("");
+ document.getElementById("blookColumns").innerHTML=cols;
+ const hidden=boxData.flatMap(p=>p.items.filter(x=>x.hidden));const ownedHidden=hidden.filter(x=>state.blox.includes(x.name));
+ const hs=document.getElementById("hiddenBloxSection");if(hs)hs.style.display=ownedHidden.length?"block":"none";
+ const hc=document.getElementById("hiddenBloxColumns");if(hc)hc.innerHTML=ownedHidden.length?`<div class="packColumn hiddenBloxPack"><h2>✨ Hidden Blox</h2><div class="packItems">${ownedHidden.sort((a,b)=>a.name.localeCompare(b.name)).map(renderItem).join("")}</div></div>`:"";
+}
+function showBloxDetail(name){
+ const item=boxData.flatMap(p=>p.items).find(x=>x.name===name);
+ if(!item||!state.blox.includes(item.name))return;
+ document.getElementById("bloxDetailImg").textContent=item.icon;
+ document.getElementById("bloxDetailName").textContent=item.name;
+ const r=document.getElementById("bloxDetailRarity");r.textContent=item.rarity;r.className=`bloxDetailRarity ${item.rarity.toLowerCase()}`;
+ document.getElementById("bloxDetail").classList.add("open");
+}
+function closeBloxDetail(){document.getElementById("bloxDetail").classList.remove("open")}
+document.getElementById("blookColumns").addEventListener("click",e=>{const card=e.target.closest("[data-blox-name]");if(card)showBloxDetail(card.dataset.bloxName)});
+function equip(n){state.equipped=n;save();renderCollection();toast(n+" equipped!")}
+let draft=[];
+function setTab(t){document.getElementById("playsets").style.display=t==="playsets"?"block":"none";document.getElementById("creator").style.display=t==="creator"?"block":"none"}
+function addQuestion(){let q=document.getElementById("newQ").value.trim(), a=document.getElementById("newAnswers").value.split("\n").map(x=>x.trim()).filter(Boolean);if(!q||a.length<2)return toast("Add a question and at least 2 answers");draft.push({q,a,cat:"Custom"});document.getElementById("newQ").value="";document.getElementById("newAnswers").value="";renderDraft()}
+function renderDraft(){let el=document.getElementById("draftList");if(!el)return;el.innerHTML=draft.map((x,i)=>`<div class="leader"><b>${i+1}</b><span>${x.q}</span><button class="danger" onclick="draft.splice(${i},1);renderDraft()">Delete</button></div>`).join("")||"<p class='small'>No draft questions yet.</p>"}
+function saveSet(){let title=document.getElementById("newSetTitle").value.trim()||"My New Set";if(!draft.length)return toast("Add at least one question");state.sets.push(normaliseQuestionSet({title,questions:[...draft]}));draft=[];document.getElementById("newSetTitle").value="";document.getElementById("newQ").value="";document.getElementById("newAnswers").value="";save();renderSets();renderHostSetChoice();show("sets");toast("Question set saved!")}
+updateTop();
+</script>
+</body>
+</html>
